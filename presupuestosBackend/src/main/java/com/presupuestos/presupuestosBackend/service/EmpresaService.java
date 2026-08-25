@@ -1,12 +1,12 @@
 package com.presupuestos.presupuestosBackend.service;
 
-import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
+import java.util.Optional;
+import java.util.List;
 
 import com.presupuestos.presupuestosBackend.model.Empresa;
 import com.presupuestos.presupuestosBackend.repository.EmpresaRepository;
+
 
 @Service
 public class EmpresaService {
@@ -17,15 +17,23 @@ public class EmpresaService {
         this.empresaRepository = empresaRepository;
     }
 
-    public List<Empresa> listar() {
-        return empresaRepository.findAll();
+    public List<Empresa> listarEmpresa(){
+        return this.empresaRepository.findAll();
     }
 
-    public Optional<Empresa> buscarPorId(Long id) {
-        return empresaRepository.findById(id);
+    public Optional<Empresa> buscarEmpresaId(Long id){
+        return this.empresaRepository.findById(id);
     }
 
-    public Empresa guardar(Empresa empresa) {
+    public Empresa crearEmpresa(Empresa empresa){
         return empresaRepository.save(empresa);
+    }
+
+    public Empresa actualizarEmpresa(Empresa empresa){
+        return empresaRepository.save(empresa);
+    }
+
+    public void eliminarEmpresa(Long id){
+        empresaRepository.deleteById(id);
     }
 }
