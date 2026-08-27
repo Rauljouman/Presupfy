@@ -1,5 +1,6 @@
 package com.presupuestos.presupuestosBackend.model;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -171,5 +172,13 @@ public class Presupuesto {
 
     public void setLineas(List<LineaPresupuesto> lineas) {
         this.lineas = lineas;
+    }
+
+    public BigDecimal calcularTotal(){
+        BigDecimal total = BigDecimal.ZERO;
+        for(int i = 0; i < lineas.size() ; i++) {
+            total = total.add(lineas.get(i).calcularTotal());
+        }
+        return total;
     }
 }

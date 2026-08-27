@@ -34,8 +34,6 @@ public class Cliente {
 
     private String email;
 
-    private boolean activo = true;
-
     @ManyToOne
     @JoinColumn(name = "empresa_id", nullable = false)
     private Empresa empresa;
@@ -155,14 +153,6 @@ public class Cliente {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public boolean isActivo() {
-        return activo;
-    }
-
-    public void setActivo(boolean activo) {
-        this.activo = activo;
     }
 
     public Empresa getEmpresa() {

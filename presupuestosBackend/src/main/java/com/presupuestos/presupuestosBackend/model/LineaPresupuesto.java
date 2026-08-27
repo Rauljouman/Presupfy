@@ -23,9 +23,9 @@ public class LineaPresupuesto {
 
     private BigDecimal precioUnitario;
 
-    private BigDecimal tipoIva;
+    private BigDecimal tipoIva = BigDecimal.valueOf(21);
 
-    private BigDecimal porcentajeDescuento;
+    private BigDecimal porcentajeDescuento = BigDecimal.ZERO;
 
     @ManyToOne
     @JoinColumn(name = "presupuesto_id", nullable = false)
@@ -124,5 +124,14 @@ public class LineaPresupuesto {
 
     public void setPresupuesto(Presupuesto presupuesto) {
         this.presupuesto = presupuesto;
+    }
+
+    public BigDecimal calcularTotal(){
+
+        BigDecimal precioSinDescuento =  precioUnitario.multiply(cantidad);
+        BigDecimal importeDescuento = precioSinDescuento.multiply(porcentajeDescuento).divide(BigDecimal.valueOf(100));
+        BigDecimal precioDescuento = precioSinDescuento.subtract(importeDescuento);
+        BigDecimal precioIVA = precioDescuento.multiply(tipoIva).divide(BigDecimal.valueOf(100));
+        return precioDescuento.add(precioIVA);
     }
 }
