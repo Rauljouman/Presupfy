@@ -5,6 +5,8 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.Optional;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.stereotype.Service;
 
 import com.presupuestos.presupuestosBackend.enums.EstadoPresupuesto;
@@ -112,7 +114,93 @@ public class PresupuestoService {
         return presupuestoRepository.save(presupuesto);
     }
 
-    
+    public Presupuesto enviarPresupuesto(Long id){
+        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
+        if(presupuestoEncontrado.isEmpty()){
+            throw new RuntimeException("No se ha encontrado el presupuesto");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        }
+
+        Presupuesto presupuesto = presupuestoEncontrado.get();
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
+            throw new RuntimeException("El presupuesto solo se puede enviar en estado borrador");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+        }
+
+        presupuesto.setEstado(EstadoPresupuesto.ENVIADO);
+        presupuesto.setFechaEnvio(LocalDate.now());;
+        return presupuestoRepository.save(presupuesto);
+    }
+
+    public Presupuesto aprobarPresupuesto(Long id){
+        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
+
+        if(presupuestoEncontrado.isEmpty()){
+            throw new RuntimeException("No se ha encontrado el presupuesto");
+        }
+
+        Presupuesto presupuesto = presupuestoEncontrado.get();
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
+            throw new RuntimeException("No se ha enviado el presupuesto");
+        }
+
+        presupuesto.setEstado(EstadoPresupuesto.APROBADO);
+        presupuesto.setFechaRespuesta(LocalDate.now());
+
+        return presupuestoRepository.save(presupuesto);
+    }
+
+    public Presupuesto rechazarPresupuesto(Long id){
+        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
+
+        if(presupuestoEncontrado.isEmpty()){
+            throw new RuntimeException("No se ha encontrado el presupuesto");
+        }
+
+        Presupuesto presupuesto = presupuestoEncontrado.get();
+
+        if (presupuesto.getEstado() != EstadoPresupuesto.ENVIADO) {
+            throw new RuntimeException("Solo se pueden rechazar presupuestos enviados");
+        }
+
+        presupuesto.setEstado(EstadoPresupuesto.RECHAZADO);
+        presupuesto.setFechaRespuesta(LocalDate.now());
+
+        return presupuestoRepository.save(presupuesto);
+    }
+
+    public Presupuesto caducarPresupuesto(Long id){
+        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
+
+        if(presupuestoEncontrado.isEmpty()){
+            throw new RuntimeException("No se encontro el presupuesto");
+        }
+
+        Presupuesto presupuesto = presupuestoEncontrado.get();
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
+            throw new RuntimeException("Solo se pueden caducar presupuestos enviados");
+        }
+
+        presupuesto.setEstado(EstadoPresupuesto.CADUCADO);
+        return presupuestoRepository.save(presupuesto);
+    }
+
+    public boolean necesitaAvisoRespuesta(Presupuesto presupuesto){
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
+            return false;
+        }
+
+        LocalDate hoy = LocalDate.now();
+        LocalDate fechaLimite = presupuesto.getFechaEnvio().plusDays(15);
+
+        if(hoy.isEqual(fechaLimite) || hoy.isAfter(fechaLimite)){
+            return true;
+        }
+        
+        return false;
+    }
 
 }
