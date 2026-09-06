@@ -3,22 +3,28 @@ package com.presupuestos.presupuestosBackend.service;
 import java.io.StringReader;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Optional;
 
 import javax.management.RuntimeErrorException;
 
 import org.springframework.stereotype.Service;
 
+import com.presupuestos.presupuestosBackend.dto.LineaPresupuestoRequestDTO;
+import com.presupuestos.presupuestosBackend.dto.PresupuestoRequestDTO;
+import com.presupuestos.presupuestosBackend.dto.PresupuestoResponseDTO;
 import com.presupuestos.presupuestosBackend.enums.EstadoPresupuesto;
-
+import com.presupuestos.presupuestosBackend.mapper.PresupuestoMapper;
 import com.presupuestos.presupuestosBackend.model.Cliente;
 import com.presupuestos.presupuestosBackend.model.Empresa;
-import com.presupuestos.presupuestosBackend.model.Usuario;
+import com.presupuestos.presupuestosBackend.model.LineaPresupuesto;
 import com.presupuestos.presupuestosBackend.model.Presupuesto;
-
+import com.presupuestos.presupuestosBackend.model.ProductoServicio;
+import com.presupuestos.presupuestosBackend.model.Usuario;
 import com.presupuestos.presupuestosBackend.repository.ClienteRepository;
 import com.presupuestos.presupuestosBackend.repository.EmpresaRepository;
 import com.presupuestos.presupuestosBackend.repository.PresupuestoRepository;
+import com.presupuestos.presupuestosBackend.repository.ProductoServicioRepository;
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
 
 @Service
@@ -28,17 +34,23 @@ public class PresupuestoService {
     private final ClienteRepository clienteRepository;
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final PresupuestoMapper presupuestoMapper;
+    private final ProductoServicioRepository productoServicioRepository;
 
-    public PresupuestoService(UsuarioRepository usuarioRepository, PresupuestoRepository presupuestoRepository, ClienteRepository clienteRepository, EmpresaRepository empresaRepository) {
+    public PresupuestoService(ProductoServicioRepository productoServicioRepository, PresupuestoMapper presupuestoMapper, UsuarioRepository usuarioRepository, PresupuestoRepository presupuestoRepository, ClienteRepository clienteRepository, EmpresaRepository empresaRepository) {
         this.usuarioRepository = usuarioRepository;
         this.presupuestoRepository = presupuestoRepository;
         this.clienteRepository = clienteRepository;
         this.empresaRepository = empresaRepository;
+        this.presupuestoMapper = presupuestoMapper;
+        this.productoServicioRepository = productoServicioRepository;
     }
 
-    public Presupuesto crearPresupuesto(Presupuesto presupuesto){
+    public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto){
         
-        Long clienteId = presupuesto.getCliente().getId();
+        Presupuesto presupuesto = new Presupuesto();
+
+        Long clienteId = dto.getClienteId();
         Optional<Cliente> clienteEncontrado = clienteRepository.findById(clienteId);
 
         if(clienteEncontrado.isEmpty()){
@@ -48,7 +60,7 @@ public class PresupuestoService {
         Cliente cliente = clienteEncontrado.get();
 
 
-        Long empresaId = presupuesto.getEmpresa().getId();
+        Long empresaId = dto.getEmpresaId();
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
@@ -61,7 +73,7 @@ public class PresupuestoService {
             throw new RuntimeException("Error, el cliente no pertenece a esta empresa"); 
         }
 
-        Long usuarioId = presupuesto.getUsuario().getId();
+        Long usuarioId = dto.getUsuarioId();
         Optional<Usuario> usuarioEncontrado =  usuarioRepository.findById(usuarioId);
 
         if(usuarioEncontrado.isEmpty()){
@@ -98,11 +110,78 @@ public class PresupuestoService {
 
             siguienteNumero = numeroConvertido + 1;
 
-            
         }
 
         String numeroFormateado = String.format("%04d", siguienteNumero);
         String numeroPresupuesto = "PRE-" + anio + "-" + numeroFormateado;
+
+        List<LineaPresupuestoRequestDTO> lineasDTO = dto.getLineas();
+
+        if (lineasDTO == null || lineasDTO.isEmpty()) {
+            throw new RuntimeException(
+                    "El presupuesto debe contener al menos una línea"
+            );
+        }
+
+        for(LineaPresupuestoRequestDTO lineaDTO : lineasDTO){
+
+            if(lineaDTO.getProductoServicioId() != null){
+
+                //Procutos y servicios del catálgo
+
+                Long productoServicioId = lineaDTO.getProductoServicioId();
+
+                Optional<ProductoServicio> productoEncontrado = productoServicioRepository.findById(productoServicioId);
+
+                if(productoEncontrado.isEmpty()){
+                    throw new RuntimeException("Error, no se ha encontrado el producto o servicio.");
+                }
+
+                ProductoServicio productoServicio = productoEncontrado.get();
+
+                if(!productoServicio.getEmpresa().getId().equals(empresa.getId())){
+                    throw new RuntimeException("Error, el producto o servicio no pertenece a esta empresa.");
+
+                }
+
+                LineaPresupuesto linea = new LineaPresupuesto();
+
+                linea.setProductoServicio(productoServicio);
+                linea.setNombre(productoServicio.getNombre());
+                linea.setDescripcion(productoServicio.getDescripcion());
+                linea.setPrecioUnitario(productoServicio.getPrecioBase());
+                linea.setTipoIva(productoServicio.getTipoIva());
+                linea.setCantidad(lineaDTO.getCantidad());
+                linea.setPorcentajeDescuento(lineaDTO.getPorcentajeDescuento());
+                linea.setPresupuesto(presupuesto);
+
+                presupuesto.getLineas().add(linea);
+            }
+            else {
+
+                if(lineaDTO.getNombre() == null || lineaDTO.getTipoIva() == null || lineaDTO.getPrecioUnitario() == null || lineaDTO.getNombre().isBlank()){
+
+                    throw new RuntimeException("Una línea manual necesita nombre, precio e IVA");
+
+                }
+                
+                //Productos y servicios en modo manual
+
+                LineaPresupuesto linea = new LineaPresupuesto();
+
+                linea.setNombre(lineaDTO.getNombre());
+                linea.setDescripcion(lineaDTO.getDescripcion());
+                linea.setPrecioUnitario(lineaDTO.getPrecioUnitario());
+                linea.setTipoIva(lineaDTO.getTipoIva());
+
+                linea.setCantidad(lineaDTO.getCantidad());
+                linea.setPorcentajeDescuento(lineaDTO.getPorcentajeDescuento());
+
+                linea.setPresupuesto(presupuesto);
+
+                presupuesto.getLineas().add(linea);
+            }
+        }
 
         presupuesto.setUsuario(usuario);
         presupuesto.setCliente(cliente);
@@ -110,8 +189,12 @@ public class PresupuestoService {
         presupuesto.setFechaCreacion(LocalDate.now());
         presupuesto.setEmpresa(empresa);
         presupuesto.setNumeroPresupuesto(numeroPresupuesto);
+        presupuesto.setTitulo(dto.getTitulo());
+        presupuesto.setNotas(dto.getNotas());   
 
-        return presupuestoRepository.save(presupuesto);
+        Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoGuardado);
     }
 
     public Presupuesto enviarPresupuesto(Long id){

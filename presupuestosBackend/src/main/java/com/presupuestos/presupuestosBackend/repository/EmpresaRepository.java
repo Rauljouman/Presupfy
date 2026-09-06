@@ -1,7 +1,8 @@
 package com.presupuestos.presupuestosBackend.repository;
 
-import com.presupuestos.presupuestosBackend.model.Empresa;
 import org.springframework.data.jpa.repository.JpaRepository;
+
+import com.presupuestos.presupuestosBackend.model.Empresa;
 
 public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     
