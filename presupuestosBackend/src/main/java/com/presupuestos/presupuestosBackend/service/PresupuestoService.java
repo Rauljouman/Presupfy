@@ -197,7 +197,8 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoGuardado);
     }
 
-    public Presupuesto enviarPresupuesto(Long id){
+    public PresupuestoResponseDTO enviarPresupuesto(Long id){
+
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
@@ -211,30 +212,37 @@ public class PresupuestoService {
         }
 
         presupuesto.setEstado(EstadoPresupuesto.ENVIADO);
-        presupuesto.setFechaEnvio(LocalDate.now());;
-        return presupuestoRepository.save(presupuesto);
+        presupuesto.setFechaEnvio(LocalDate.now());
+
+        Presupuesto presupuestoEnviado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoEnviado);
     }
 
-    public Presupuesto aprobarPresupuesto(Long id){
+    public PresupuestoResponseDTO aprobarPresupuesto(Long id){
+
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("No se ha encontrado el presupuesto");
+            throw new RuntimeException("Error, no se ha encontrado el presupuesto");
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
-            throw new RuntimeException("No se ha enviado el presupuesto");
+            throw new RuntimeException("Solo se pueden aprobar presupuestos enviados");
         }
 
         presupuesto.setEstado(EstadoPresupuesto.APROBADO);
         presupuesto.setFechaRespuesta(LocalDate.now());
 
-        return presupuestoRepository.save(presupuesto);
+        Presupuesto presupuestoAprobado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoAprobado);
     }
 
-    public Presupuesto rechazarPresupuesto(Long id){
+    public PresupuestoResponseDTO rechazarPresupuesto(Long id){
+
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
@@ -250,10 +258,12 @@ public class PresupuestoService {
         presupuesto.setEstado(EstadoPresupuesto.RECHAZADO);
         presupuesto.setFechaRespuesta(LocalDate.now());
 
-        return presupuestoRepository.save(presupuesto);
+        Presupuesto presupuestoRechazado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoRechazado);
     }
 
-    public Presupuesto caducarPresupuesto(Long id){
+    public PresupuestoResponseDTO caducarPresupuesto(Long id){
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
@@ -267,7 +277,10 @@ public class PresupuestoService {
         }
 
         presupuesto.setEstado(EstadoPresupuesto.CADUCADO);
-        return presupuestoRepository.save(presupuesto);
+
+        Presupuesto presupuestoCaducado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoCaducado);
     }
 
     public boolean necesitaAvisoRespuesta(Presupuesto presupuesto){
@@ -284,6 +297,22 @@ public class PresupuestoService {
         }
         
         return false;
+    }
+
+    public void eliminarPresupuesto(Long id){
+        Optional<Presupuesto> presupuestoEncontrado =  presupuestoRepository.findById(id);
+
+        if(presupuestoEncontrado.isEmpty()){
+            throw new RuntimeException("El presupuesto no existe");
+        }
+
+        Presupuesto presupuesto = presupuestoEncontrado.get();
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
+            throw new RuntimeException("El presupuesto solo puede borrarse en estado 'Borrador'");
+        }
+
+        presupuestoRepository.delete(presupuesto);
     }
 
 }
