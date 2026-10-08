@@ -1,12 +1,9 @@
 package com.presupuestos.presupuestosBackend.service;
 
-import java.io.StringReader;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-
-import javax.management.RuntimeErrorException;
 
 import org.springframework.stereotype.Service;
 
@@ -14,6 +11,10 @@ import com.presupuestos.presupuestosBackend.dto.LineaPresupuestoRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.PresupuestoRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.PresupuestoResponseDTO;
 import com.presupuestos.presupuestosBackend.enums.EstadoPresupuesto;
+import com.presupuestos.presupuestosBackend.exception.ConflictoException;
+import com.presupuestos.presupuestosBackend.exception.AccesoDenegadoException;
+import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
+import com.presupuestos.presupuestosBackend.exception.SolicitudInvalidaException;
 import com.presupuestos.presupuestosBackend.mapper.PresupuestoMapper;
 import com.presupuestos.presupuestosBackend.model.Cliente;
 import com.presupuestos.presupuestosBackend.model.Empresa;
@@ -46,6 +47,27 @@ public class PresupuestoService {
         this.productoServicioRepository = productoServicioRepository;
     }
 
+    public List<PresupuestoResponseDTO> listarPresupuesto(Long empresaId){
+
+        Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
+
+        if(empresaEncontrada.isEmpty()){
+            throw new RecursoNoEncontradoException("No se ha encontrado la empresa");
+        }
+
+        Empresa empresa = empresaEncontrada.get();
+
+        List<Presupuesto> presupuestos = presupuestoRepository.findByEmpresa(empresa);
+
+        List<PresupuestoResponseDTO> presupuestosDTO = new ArrayList<>();
+
+        for(Presupuesto presupuesto : presupuestos){
+            presupuestosDTO.add(presupuestoMapper.toResponseDTO(presupuesto));
+        }
+
+        return presupuestosDTO;
+    }
+
     public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto){
         
         Presupuesto presupuesto = new Presupuesto();
@@ -54,7 +76,7 @@ public class PresupuestoService {
         Optional<Cliente> clienteEncontrado = clienteRepository.findById(clienteId);
 
         if(clienteEncontrado.isEmpty()){
-            throw new RuntimeException("Error, no existe el cliente"); 
+            throw new RecursoNoEncontradoException("Error, no existe el cliente"); 
         }
 
         Cliente cliente = clienteEncontrado.get();
@@ -64,26 +86,26 @@ public class PresupuestoService {
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
-            throw new RuntimeException("Error, no existe la empresa"); 
+            throw new RecursoNoEncontradoException("Error, no existe la empresa"); 
         }
 
         Empresa empresa = empresaEncontrada.get();
 
         if(!cliente.getEmpresa().getId().equals(empresa.getId())) {
-            throw new RuntimeException("Error, el cliente no pertenece a esta empresa"); 
+            throw new AccesoDenegadoException("Error, el cliente no pertenece a esta empresa"); 
         }
 
         Long usuarioId = dto.getUsuarioId();
         Optional<Usuario> usuarioEncontrado =  usuarioRepository.findById(usuarioId);
 
         if(usuarioEncontrado.isEmpty()){
-            throw new RuntimeException("Error, usuario no encontrado");
+            throw new RecursoNoEncontradoException("Error, usuario no encontrado");
         }
 
         Usuario usuario = usuarioEncontrado.get();
 
         if(!usuario.getEmpresa().getId().equals(empresa.getId())){
-            throw new RuntimeException("Error, el usuario no pertenece a esta empresa");
+            throw new AccesoDenegadoException("Error, el usuario no pertenece a esta empresa");
         }   
         
         int anio = LocalDate.now().getYear();
@@ -118,9 +140,7 @@ public class PresupuestoService {
         List<LineaPresupuestoRequestDTO> lineasDTO = dto.getLineas();
 
         if (lineasDTO == null || lineasDTO.isEmpty()) {
-            throw new RuntimeException(
-                    "El presupuesto debe contener al menos una línea"
-            );
+            throw new SolicitudInvalidaException("El presupuesto debe contener al menos una línea");
         }
 
         for(LineaPresupuestoRequestDTO lineaDTO : lineasDTO){
@@ -134,13 +154,13 @@ public class PresupuestoService {
                 Optional<ProductoServicio> productoEncontrado = productoServicioRepository.findById(productoServicioId);
 
                 if(productoEncontrado.isEmpty()){
-                    throw new RuntimeException("Error, no se ha encontrado el producto o servicio.");
+                    throw new RecursoNoEncontradoException("Error, no se ha encontrado el producto o servicio.");
                 }
 
                 ProductoServicio productoServicio = productoEncontrado.get();
 
                 if(!productoServicio.getEmpresa().getId().equals(empresa.getId())){
-                    throw new RuntimeException("Error, el producto o servicio no pertenece a esta empresa.");
+                    throw new AccesoDenegadoException("Error, el producto o servicio no pertenece a esta empresa.");
 
                 }
 
@@ -161,7 +181,7 @@ public class PresupuestoService {
 
                 if(lineaDTO.getNombre() == null || lineaDTO.getTipoIva() == null || lineaDTO.getPrecioUnitario() == null || lineaDTO.getNombre().isBlank()){
 
-                    throw new RuntimeException("Una línea manual necesita nombre, precio e IVA");
+                    throw new SolicitudInvalidaException("Una línea manual necesita nombre, precio e IVA");
 
                 }
                 
@@ -202,13 +222,13 @@ public class PresupuestoService {
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("No se ha encontrado el presupuesto");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+            throw new RecursoNoEncontradoException("No se ha encontrado el presupuesto");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
-            throw new RuntimeException("El presupuesto solo se puede enviar en estado borrador");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+            throw new ConflictoException("El presupuesto solo se puede enviar en estado borrador");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
         }
 
         presupuesto.setEstado(EstadoPresupuesto.ENVIADO);
@@ -224,13 +244,13 @@ public class PresupuestoService {
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("Error, no se ha encontrado el presupuesto");
+            throw new RecursoNoEncontradoException("Error, no se ha encontrado el presupuesto");
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
-            throw new RuntimeException("Solo se pueden aprobar presupuestos enviados");
+            throw new ConflictoException("Solo se pueden aprobar presupuestos enviados");
         }
 
         presupuesto.setEstado(EstadoPresupuesto.APROBADO);
@@ -246,13 +266,13 @@ public class PresupuestoService {
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("No se ha encontrado el presupuesto");
+            throw new RecursoNoEncontradoException("No se ha encontrado el presupuesto");
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if (presupuesto.getEstado() != EstadoPresupuesto.ENVIADO) {
-            throw new RuntimeException("Solo se pueden rechazar presupuestos enviados");
+            throw new ConflictoException("Solo se pueden rechazar presupuestos enviados");
         }
 
         presupuesto.setEstado(EstadoPresupuesto.RECHAZADO);
@@ -267,13 +287,13 @@ public class PresupuestoService {
         Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("No se encontro el presupuesto");
+            throw new RecursoNoEncontradoException("No se encontro el presupuesto");
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
-            throw new RuntimeException("Solo se pueden caducar presupuestos enviados");
+            throw new ConflictoException("Solo se pueden caducar presupuestos enviados");
         }
 
         presupuesto.setEstado(EstadoPresupuesto.CADUCADO);
@@ -303,13 +323,13 @@ public class PresupuestoService {
         Optional<Presupuesto> presupuestoEncontrado =  presupuestoRepository.findById(id);
 
         if(presupuestoEncontrado.isEmpty()){
-            throw new RuntimeException("El presupuesto no existe");
+            throw new RecursoNoEncontradoException("El presupuesto no existe");
         }
 
         Presupuesto presupuesto = presupuestoEncontrado.get();
 
         if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
-            throw new RuntimeException("El presupuesto solo puede borrarse en estado 'Borrador'");
+            throw new ConflictoException("El presupuesto solo puede borrarse en estado 'Borrador'");
         }
 
         presupuestoRepository.delete(presupuesto);

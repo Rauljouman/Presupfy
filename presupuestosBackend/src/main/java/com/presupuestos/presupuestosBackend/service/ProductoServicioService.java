@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.presupuestos.presupuestosBackend.dto.ProductoServicioRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.ProductoServicioResponseDTO;
+import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
 import com.presupuestos.presupuestosBackend.mapper.ProductoServicioMapper;
 import com.presupuestos.presupuestosBackend.model.Empresa;
 import com.presupuestos.presupuestosBackend.model.ProductoServicio;
@@ -41,7 +42,7 @@ public class ProductoServicioService {
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
-            throw new RuntimeException("Error, no se ha encontrado ninguna empresa.");
+            throw new RecursoNoEncontradoException("Error, no se ha encontrado ninguna empresa.");
         }
 
         Empresa empresa = empresaEncontrada.get();

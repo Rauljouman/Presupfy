@@ -5,6 +5,8 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
+import com.presupuestos.presupuestosBackend.exception.SolicitudInvalidaException;
 import com.presupuestos.presupuestosBackend.dto.ClienteRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.ClienteResponseDTO;
 import com.presupuestos.presupuestosBackend.enums.TipoCliente;
@@ -39,11 +41,11 @@ public class ClienteService {
 
         if(dto.getTipoCliente() == TipoCliente.PARTICULAR) {
             if(dto.getNombre() == null || dto.getNombre().isBlank() || dto.getDni() == null || dto.getDni().isBlank()){
-                throw new RuntimeException("El nombre y el DNI son obligatorios para un cliente particular");    
+                throw new SolicitudInvalidaException("El nombre y el DNI son obligatorios para un cliente particular");    
             }
         }else if (dto.getTipoCliente() == TipoCliente.EMPRESA){
             if(dto.getRazonSocial() == null || dto.getRazonSocial().isBlank() || dto.getNif() == null || dto.getNif().isBlank()){
-                throw new RuntimeException("La razón social y el NIF son obligatorios para un cliente empresa");    
+                throw new SolicitudInvalidaException("La razón social y el NIF son obligatorios para un cliente empresa");    
             }
         }
         
@@ -52,7 +54,7 @@ public class ClienteService {
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
-            throw new RuntimeException("Error, no se ha encotrado la empresa");
+            throw new RecursoNoEncontradoException("Error, no se ha encotrado la empresa");
         }
 
         Empresa empresa = empresaEncontrada.get();

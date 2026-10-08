@@ -9,6 +9,8 @@ import com.presupuestos.presupuestosBackend.repository.EmpresaRepository;
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
 
 import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
+import com.presupuestos.presupuestosBackend.exception.ConflictoException;
+import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
 import com.presupuestos.presupuestosBackend.mapper.UsuarioMapper;
 import com.presupuestos.presupuestosBackend.model.Empresa;
 import com.presupuestos.presupuestosBackend.model.Usuario;
@@ -47,7 +49,7 @@ public class UsuarioService {
     public UsuarioResponseDTO crearUsuario(UsuarioRequestDTO dto){
 
         if(usuarioRepository.existsByEmail(dto.getEmail())){
-            throw new RuntimeException("Ya existe un usuario con este correo");
+            throw new ConflictoException("Ya existe un usuario con este correo");
         }
 
         Long empresaId = dto.getEmpresaId();
@@ -55,7 +57,7 @@ public class UsuarioService {
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
-            throw new RuntimeException("Error, no se ha encontrado la empresa");
+            throw new RecursoNoEncontradoException("Error, no se ha encontrado la empresa");
         }
 
         Empresa empresa = empresaEncontrada.get();
