@@ -1,6 +1,7 @@
 package com.presupuestos.presupuestosBackend.service;
 
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
@@ -29,8 +30,25 @@ public class ClienteService {
         this.clienteMapper = clienteMapper;
     }
 
-    public List<Cliente> listarCliente(){
-        return clienteRepository.findAll();
+    public List<ClienteResponseDTO> listarCliente(Long empresaId){
+
+        Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
+
+        if(empresaEncontrada.isEmpty()){
+            throw new RecursoNoEncontradoException("No se ha encontrado la empresa.");
+        }
+
+        Empresa empresa = empresaEncontrada.get();
+
+        List<Cliente> clientes = clienteRepository.findByEmpresa(empresa); 
+
+        List<ClienteResponseDTO> clienteDTO = new ArrayList<>();
+
+        for(Cliente cliente : clientes){
+            clienteDTO.add(clienteMapper.toResponseDTO(cliente));
+        }
+
+        return clienteDTO;
     }
 
     public Optional<Cliente> buscarClienteId(Long id){

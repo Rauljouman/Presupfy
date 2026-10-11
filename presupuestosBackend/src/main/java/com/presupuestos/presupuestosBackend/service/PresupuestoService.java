@@ -28,6 +28,8 @@ import com.presupuestos.presupuestosBackend.repository.PresupuestoRepository;
 import com.presupuestos.presupuestosBackend.repository.ProductoServicioRepository;
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
 
+import jakarta.transaction.Transactional;
+
 @Service
 public class PresupuestoService {
 
@@ -66,6 +68,19 @@ public class PresupuestoService {
         }
 
         return presupuestosDTO;
+    }
+
+    public PresupuestoResponseDTO buscarPresupuesto(Long id,Long empresaId){
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        Presupuesto presupuestoEncontrado = presupuestoRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Nose ha encontrado el presupuesto"));
+        
+        if(!presupuestoEncontrado.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El presupuesto no pertenece a esta empredsa");
+        }
+
+        return presupuestoMapper.toResponseDTO(presupuestoEncontrado);
     }
 
     public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto){
@@ -215,6 +230,78 @@ public class PresupuestoService {
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
 
         return presupuestoMapper.toResponseDTO(presupuestoGuardado);
+    }
+
+    @Transactional 
+    public PresupuestoResponseDTO modificarPresupuesto(Long id, PresupuestoRequestDTO dto){
+
+        Presupuesto presupuesto = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la presupuesto"));
+
+        if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
+            throw new ConflictoException("El presupuesto solo puede modificarse si esta en estado de BORRADOR");
+        }
+
+        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if(!presupuesto.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El presupuesto no pertenece a la misma empresa");
+        }
+
+        Cliente cliente = clienteRepository.findById(dto.getClienteId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el cliente"));
+
+        if(!cliente.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El cliente no pertenece a este presupuesto");
+        }
+
+        presupuesto.setTitulo(dto.getTitulo());
+        presupuesto.setNotas(dto.getNotas());
+        presupuesto.setCliente(cliente);
+        presupuesto.getLineas().clear();
+
+        for(LineaPresupuestoRequestDTO lineaDTO : dto.getLineas()){
+
+            LineaPresupuesto linea = new LineaPresupuesto();
+
+            if (lineaDTO.getProductoServicioId() != null) {
+
+                ProductoServicio productoServicio = productoServicioRepository.findById(lineaDTO.getProductoServicioId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encotrados ni el producto ni el servicio"));                
+                
+                if(!productoServicio.getEmpresa().getId().equals(empresa.getId())){
+                    throw new AccesoDenegadoException("El id de ProductosServicios no pertenece a esta empresa");
+                }
+
+                linea.setProductoServicio(productoServicio);
+                linea.setNombre(productoServicio.getNombre());
+                linea.setDescripcion(productoServicio.getDescripcion());
+                linea.setPrecioUnitario(productoServicio.getPrecioBase());
+                linea.setTipoIva(productoServicio.getTipoIva());
+
+            } else {
+
+                if (lineaDTO.getNombre() == null
+                        || lineaDTO.getNombre().isBlank()
+                        || lineaDTO.getPrecioUnitario() == null
+                        || lineaDTO.getTipoIva() == null) {
+
+                    throw new SolicitudInvalidaException("Una línea manual necesita nombre, precio e IVA");
+                }
+
+                linea.setNombre(lineaDTO.getNombre());
+                linea.setDescripcion(lineaDTO.getDescripcion());
+                linea.setPrecioUnitario(lineaDTO.getPrecioUnitario());
+                linea.setTipoIva(lineaDTO.getTipoIva());
+            }
+
+            linea.setCantidad(lineaDTO.getCantidad());
+            linea.setPorcentajeDescuento(lineaDTO.getPorcentajeDescuento());
+
+            linea.setPresupuesto(presupuesto);
+            presupuesto.getLineas().add(linea);
+        }
+
+        Presupuesto presupuestoActualizado = presupuestoRepository.save(presupuesto);
+
+        return presupuestoMapper.toResponseDTO(presupuestoActualizado);
     }
 
     public PresupuestoResponseDTO enviarPresupuesto(Long id){
