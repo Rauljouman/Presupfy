@@ -47,34 +47,34 @@ public class PresupuestoController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<PresupuestoResponseDTO> modificarPresupuesto(@PathVariable Long id, @RequestBody PresupuestoRequestDTO dto) {
+    public ResponseEntity<PresupuestoResponseDTO> modificarPresupuesto(@PathVariable Long id,@Valid  @RequestBody PresupuestoRequestDTO dto) {
         PresupuestoResponseDTO presupuesto = presupuestoService.modificarPresupuesto(id, dto);
         return ResponseEntity.ok(presupuesto);
     }
 
     @PatchMapping ("/{id}/enviar")
-    public PresupuestoResponseDTO enviarPresupuesto(@PathVariable Long id ){
-        return presupuestoService.enviarPresupuesto(id);
+    public PresupuestoResponseDTO enviarPresupuesto(@PathVariable Long id, @RequestParam Long empresaId){
+        return presupuestoService.enviarPresupuesto(id, empresaId);
     }
 
     @PatchMapping ("/{id}/aprobar")
-    public PresupuestoResponseDTO aprobarPresupuesto(@PathVariable Long id){
-        return presupuestoService.aprobarPresupuesto(id);
+    public PresupuestoResponseDTO aprobarPresupuesto(@PathVariable Long id, @RequestParam Long empresaId){
+        return presupuestoService.aprobarPresupuesto(id, empresaId);
     }
 
-    @PatchMapping ("/{id}/caducado")
-    public PresupuestoResponseDTO caducarPresupuesto(@PathVariable Long id){
-        return presupuestoService.caducarPresupuesto(id);
+    @PatchMapping ("/{id}/caducar")
+    public PresupuestoResponseDTO caducarPresupuesto(@PathVariable Long id, @RequestParam Long empresaId){
+        return presupuestoService.caducarPresupuesto(id, empresaId);
     }
 
     @PatchMapping("/{id}/rechazar")
-    public PresupuestoResponseDTO rechazarPresupuesto(@PathVariable Long id) {
-        return presupuestoService.rechazarPresupuesto(id);
+    public PresupuestoResponseDTO rechazarPresupuesto(@PathVariable Long id, @RequestParam Long empresaId) {
+        return presupuestoService.rechazarPresupuesto(id, empresaId);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarPresupuesto(@PathVariable Long id) {
-        presupuestoService.eliminarPresupuesto(id);
+    public void eliminarPresupuesto(@PathVariable Long id, @RequestParam Long empresaId) {
+        presupuestoService.eliminarPresupuesto(id, empresaId);
     }
 
 }

@@ -6,6 +6,7 @@ import java.util.List;
 
 import org.springframework.stereotype.Service;
 
+import com.presupuestos.presupuestosBackend.exception.AccesoDenegadoException;
 import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
 import com.presupuestos.presupuestosBackend.exception.SolicitudInvalidaException;
 import com.presupuestos.presupuestosBackend.dto.ClienteRequestDTO;
@@ -51,8 +52,17 @@ public class ClienteService {
         return clienteDTO;
     }
 
-    public Optional<Cliente> buscarClienteId(Long id){
-        return clienteRepository.findById(id);
+    public ClienteResponseDTO buscarCliente(Long id, Long empresaId){
+        
+        Cliente cliente = clienteRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el cliente"));
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha podido encontrar la empresa"));
+
+        if(!cliente.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El cliente no pertenece a esta empresa");
+        }
+
+        return clienteMapper.toResponseDTO(cliente);
     }
 
     public ClienteResponseDTO crearCliente(ClienteRequestDTO dto) {
@@ -99,11 +109,68 @@ public class ClienteService {
         return clienteMapper.toResponseDTO(clienteGuardado);
     }
 
-    public void elimianCliente(Long id){
-        clienteRepository.deleteById(id);
+    public void eliminarCliente(Long id, Long empresaId){
+        
+        Cliente cliente = clienteRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encotrado al cliente"));
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if(!cliente.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El cliente no pertenece a esta empresa");
+        }
+
+        clienteRepository.delete(cliente);
     }
 
-    public Cliente actualizarCliente(Cliente cliente){
-        return clienteRepository.save(cliente);
+    public ClienteResponseDTO actualizarCliente(Long id, ClienteRequestDTO dto) {
+
+        Cliente cliente = clienteRepository.findById(id).orElseThrow(() ->new RecursoNoEncontradoException( "No se ha encontrado el cliente"));
+
+        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(() ->new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if (!cliente.getEmpresa().getId().equals(empresa.getId())) {throw new AccesoDenegadoException("El cliente no pertenece a esta empresa");}
+
+        if (dto.getTipoCliente() == TipoCliente.PARTICULAR) {
+
+            if (dto.getNombre() == null || dto.getNombre().isBlank()|| dto.getDni() == null || dto.getDni().isBlank()) {
+
+                throw new SolicitudInvalidaException("El nombre y el DNI son obligatorios para un cliente particular");
+            }
+
+            cliente.setNombre(dto.getNombre());
+            cliente.setPrimerApellido(dto.getPrimerApellido());
+            cliente.setSegundoApellido(dto.getSegundoApellido());
+            cliente.setDni(dto.getDni());
+
+            cliente.setRazonSocial(null);
+            cliente.setNif(null);
+
+        } else if (dto.getTipoCliente() == TipoCliente.EMPRESA) {
+
+            if (dto.getRazonSocial() == null || dto.getRazonSocial().isBlank()|| dto.getNif() == null || dto.getNif().isBlank()) {
+
+                throw new SolicitudInvalidaException( "La razón social y el NIF son obligatorios para un cliente empresa");
+            }
+
+            cliente.setRazonSocial(dto.getRazonSocial());
+            cliente.setNif(dto.getNif());
+
+            cliente.setNombre(null);
+            cliente.setPrimerApellido(null);
+            cliente.setSegundoApellido(null);
+            cliente.setDni(null);
+
+        } else {
+            throw new SolicitudInvalidaException("El tipo de cliente es obligatorio");
+        }
+
+        cliente.setTipoCliente(dto.getTipoCliente());
+        cliente.setDireccion(dto.getDireccion());
+        cliente.setTelefono(dto.getTelefono());
+        cliente.setEmail(dto.getEmail());
+
+        Cliente clienteActualizado = clienteRepository.save(cliente);
+
+        return clienteMapper.toResponseDTO(clienteActualizado);
     }
 }

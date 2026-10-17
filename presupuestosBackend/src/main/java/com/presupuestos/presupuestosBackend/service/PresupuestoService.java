@@ -11,8 +11,8 @@ import com.presupuestos.presupuestosBackend.dto.LineaPresupuestoRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.PresupuestoRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.PresupuestoResponseDTO;
 import com.presupuestos.presupuestosBackend.enums.EstadoPresupuesto;
-import com.presupuestos.presupuestosBackend.exception.ConflictoException;
 import com.presupuestos.presupuestosBackend.exception.AccesoDenegadoException;
+import com.presupuestos.presupuestosBackend.exception.ConflictoException;
 import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
 import com.presupuestos.presupuestosBackend.exception.SolicitudInvalidaException;
 import com.presupuestos.presupuestosBackend.mapper.PresupuestoMapper;
@@ -70,48 +70,47 @@ public class PresupuestoService {
         return presupuestosDTO;
     }
 
-    public PresupuestoResponseDTO buscarPresupuesto(Long id,Long empresaId){
+    public PresupuestoResponseDTO buscarPresupuesto(Long id, Long empresaId){
 
         Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
 
-        Presupuesto presupuestoEncontrado = presupuestoRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("Nose ha encontrado el presupuesto"));
-        
+        Presupuesto presupuestoEncontrado = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el presupuesto"));
+
         if(!presupuestoEncontrado.getEmpresa().getId().equals(empresa.getId())){
-            throw new AccesoDenegadoException("El presupuesto no pertenece a esta empredsa");
+            throw new AccesoDenegadoException("El presupuesto no pertenece a esta empresa");
         }
 
         return presupuestoMapper.toResponseDTO(presupuestoEncontrado);
     }
 
     public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto){
-        
+
         Presupuesto presupuesto = new Presupuesto();
 
         Long clienteId = dto.getClienteId();
         Optional<Cliente> clienteEncontrado = clienteRepository.findById(clienteId);
 
         if(clienteEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("Error, no existe el cliente"); 
+            throw new RecursoNoEncontradoException("Error, no existe el cliente");
         }
 
         Cliente cliente = clienteEncontrado.get();
-
 
         Long empresaId = dto.getEmpresaId();
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
-            throw new RecursoNoEncontradoException("Error, no existe la empresa"); 
+            throw new RecursoNoEncontradoException("Error, no existe la empresa");
         }
 
         Empresa empresa = empresaEncontrada.get();
 
-        if(!cliente.getEmpresa().getId().equals(empresa.getId())) {
-            throw new AccesoDenegadoException("Error, el cliente no pertenece a esta empresa"); 
+        if(!cliente.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("Error, el cliente no pertenece a esta empresa");
         }
 
         Long usuarioId = dto.getUsuarioId();
-        Optional<Usuario> usuarioEncontrado =  usuarioRepository.findById(usuarioId);
+        Optional<Usuario> usuarioEncontrado = usuarioRepository.findById(usuarioId);
 
         if(usuarioEncontrado.isEmpty()){
             throw new RecursoNoEncontradoException("Error, usuario no encontrado");
@@ -121,20 +120,23 @@ public class PresupuestoService {
 
         if(!usuario.getEmpresa().getId().equals(empresa.getId())){
             throw new AccesoDenegadoException("Error, el usuario no pertenece a esta empresa");
-        }   
-        
+        }
+
         int anio = LocalDate.now().getYear();
-        LocalDate fechaInicio = LocalDate.of(anio,1,1);
-        LocalDate fechaFin = LocalDate.of(anio, 12,31);
+
+        LocalDate fechaInicio = LocalDate.of(anio, 1, 1);
+        LocalDate fechaFin = LocalDate.of(anio, 12, 31);
 
         Optional<Presupuesto> ultimoPresupuesto = presupuestoRepository.findFirstByEmpresaAndFechaCreacionBetweenOrderByNumeroPresupuestoDesc(empresa, fechaInicio, fechaFin);
 
         int siguienteNumero;
 
         if(ultimoPresupuesto.isEmpty()){
+
             siguienteNumero = 1;
 
-        } else {
+        }else{
+
             Presupuesto ultimo = ultimoPresupuesto.get();
 
             String numeroAnterior = ultimo.getNumeroPresupuesto();
@@ -146,15 +148,15 @@ public class PresupuestoService {
             int numeroConvertido = Integer.parseInt(numero);
 
             siguienteNumero = numeroConvertido + 1;
-
         }
 
         String numeroFormateado = String.format("%04d", siguienteNumero);
+
         String numeroPresupuesto = "PRE-" + anio + "-" + numeroFormateado;
 
         List<LineaPresupuestoRequestDTO> lineasDTO = dto.getLineas();
 
-        if (lineasDTO == null || lineasDTO.isEmpty()) {
+        if(lineasDTO == null || lineasDTO.isEmpty()){
             throw new SolicitudInvalidaException("El presupuesto debe contener al menos una línea");
         }
 
@@ -162,21 +164,20 @@ public class PresupuestoService {
 
             if(lineaDTO.getProductoServicioId() != null){
 
-                //Procutos y servicios del catálgo
+                // Productos y servicios del catálogo
 
                 Long productoServicioId = lineaDTO.getProductoServicioId();
 
                 Optional<ProductoServicio> productoEncontrado = productoServicioRepository.findById(productoServicioId);
 
                 if(productoEncontrado.isEmpty()){
-                    throw new RecursoNoEncontradoException("Error, no se ha encontrado el producto o servicio.");
+                    throw new RecursoNoEncontradoException("Error, no se ha encontrado el producto o servicio");
                 }
 
                 ProductoServicio productoServicio = productoEncontrado.get();
 
                 if(!productoServicio.getEmpresa().getId().equals(empresa.getId())){
-                    throw new AccesoDenegadoException("Error, el producto o servicio no pertenece a esta empresa.");
-
+                    throw new AccesoDenegadoException("Error, el producto o servicio no pertenece a esta empresa");
                 }
 
                 LineaPresupuesto linea = new LineaPresupuesto();
@@ -191,16 +192,14 @@ public class PresupuestoService {
                 linea.setPresupuesto(presupuesto);
 
                 presupuesto.getLineas().add(linea);
-            }
-            else {
+
+            }else{
 
                 if(lineaDTO.getNombre() == null || lineaDTO.getTipoIva() == null || lineaDTO.getPrecioUnitario() == null || lineaDTO.getNombre().isBlank()){
-
                     throw new SolicitudInvalidaException("Una línea manual necesita nombre, precio e IVA");
-
                 }
-                
-                //Productos y servicios en modo manual
+
+                // Productos y servicios en modo manual
 
                 LineaPresupuesto linea = new LineaPresupuesto();
 
@@ -208,10 +207,8 @@ public class PresupuestoService {
                 linea.setDescripcion(lineaDTO.getDescripcion());
                 linea.setPrecioUnitario(lineaDTO.getPrecioUnitario());
                 linea.setTipoIva(lineaDTO.getTipoIva());
-
                 linea.setCantidad(lineaDTO.getCantidad());
                 linea.setPorcentajeDescuento(lineaDTO.getPorcentajeDescuento());
-
                 linea.setPresupuesto(presupuesto);
 
                 presupuesto.getLineas().add(linea);
@@ -225,49 +222,54 @@ public class PresupuestoService {
         presupuesto.setEmpresa(empresa);
         presupuesto.setNumeroPresupuesto(numeroPresupuesto);
         presupuesto.setTitulo(dto.getTitulo());
-        presupuesto.setNotas(dto.getNotas());   
+        presupuesto.setNotas(dto.getNotas());
 
         Presupuesto presupuestoGuardado = presupuestoRepository.save(presupuesto);
 
         return presupuestoMapper.toResponseDTO(presupuestoGuardado);
     }
 
-    @Transactional 
+    @Transactional
     public PresupuestoResponseDTO modificarPresupuesto(Long id, PresupuestoRequestDTO dto){
 
-        Presupuesto presupuesto = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la presupuesto"));
+        Presupuesto presupuesto = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el presupuesto"));
+
+        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if(!presupuesto.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El presupuesto no pertenece a esta empresa");
+        }
 
         if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
             throw new ConflictoException("El presupuesto solo puede modificarse si esta en estado de BORRADOR");
         }
 
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
-
-        if(!presupuesto.getEmpresa().getId().equals(empresa.getId())){
-            throw new AccesoDenegadoException("El presupuesto no pertenece a la misma empresa");
-        }
-
         Cliente cliente = clienteRepository.findById(dto.getClienteId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el cliente"));
 
         if(!cliente.getEmpresa().getId().equals(empresa.getId())){
-            throw new AccesoDenegadoException("El cliente no pertenece a este presupuesto");
+            throw new AccesoDenegadoException("El cliente no pertenece a esta empresa");
+        }
+
+        if(dto.getLineas() == null || dto.getLineas().isEmpty()){
+            throw new SolicitudInvalidaException("El presupuesto debe contener al menos una línea");
         }
 
         presupuesto.setTitulo(dto.getTitulo());
         presupuesto.setNotas(dto.getNotas());
         presupuesto.setCliente(cliente);
+
         presupuesto.getLineas().clear();
 
         for(LineaPresupuestoRequestDTO lineaDTO : dto.getLineas()){
 
             LineaPresupuesto linea = new LineaPresupuesto();
 
-            if (lineaDTO.getProductoServicioId() != null) {
+            if(lineaDTO.getProductoServicioId() != null){
 
-                ProductoServicio productoServicio = productoServicioRepository.findById(lineaDTO.getProductoServicioId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encotrados ni el producto ni el servicio"));                
-                
+                ProductoServicio productoServicio = productoServicioRepository.findById(lineaDTO.getProductoServicioId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el producto o servicio"));
+
                 if(!productoServicio.getEmpresa().getId().equals(empresa.getId())){
-                    throw new AccesoDenegadoException("El id de ProductosServicios no pertenece a esta empresa");
+                    throw new AccesoDenegadoException("El producto o servicio no pertenece a esta empresa");
                 }
 
                 linea.setProductoServicio(productoServicio);
@@ -276,13 +278,9 @@ public class PresupuestoService {
                 linea.setPrecioUnitario(productoServicio.getPrecioBase());
                 linea.setTipoIva(productoServicio.getTipoIva());
 
-            } else {
+            }else{
 
-                if (lineaDTO.getNombre() == null
-                        || lineaDTO.getNombre().isBlank()
-                        || lineaDTO.getPrecioUnitario() == null
-                        || lineaDTO.getTipoIva() == null) {
-
+                if(lineaDTO.getNombre() == null || lineaDTO.getNombre().isBlank() || lineaDTO.getPrecioUnitario() == null || lineaDTO.getTipoIva() == null){
                     throw new SolicitudInvalidaException("Una línea manual necesita nombre, precio e IVA");
                 }
 
@@ -294,8 +292,8 @@ public class PresupuestoService {
 
             linea.setCantidad(lineaDTO.getCantidad());
             linea.setPorcentajeDescuento(lineaDTO.getPorcentajeDescuento());
-
             linea.setPresupuesto(presupuesto);
+
             presupuesto.getLineas().add(linea);
         }
 
@@ -304,18 +302,12 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoActualizado);
     }
 
-    public PresupuestoResponseDTO enviarPresupuesto(Long id){
+    public PresupuestoResponseDTO enviarPresupuesto(Long id, Long empresaId){
 
-        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
-
-        if(presupuestoEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("No se ha encontrado el presupuesto");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
-        }
-
-        Presupuesto presupuesto = presupuestoEncontrado.get();
+        Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
 
         if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
-            throw new ConflictoException("El presupuesto solo se puede enviar en estado borrador");                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                  
+            throw new ConflictoException("El presupuesto solo se puede enviar en estado borrador");
         }
 
         presupuesto.setEstado(EstadoPresupuesto.ENVIADO);
@@ -326,15 +318,9 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoEnviado);
     }
 
-    public PresupuestoResponseDTO aprobarPresupuesto(Long id){
+    public PresupuestoResponseDTO aprobarPresupuesto(Long id, Long empresaId){
 
-        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
-
-        if(presupuestoEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("Error, no se ha encontrado el presupuesto");
-        }
-
-        Presupuesto presupuesto = presupuestoEncontrado.get();
+        Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
             throw new ConflictoException("Solo se pueden aprobar presupuestos enviados");
@@ -348,17 +334,11 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoAprobado);
     }
 
-    public PresupuestoResponseDTO rechazarPresupuesto(Long id){
+    public PresupuestoResponseDTO rechazarPresupuesto(Long id, Long empresaId){
 
-        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
+        Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
 
-        if(presupuestoEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("No se ha encontrado el presupuesto");
-        }
-
-        Presupuesto presupuesto = presupuestoEncontrado.get();
-
-        if (presupuesto.getEstado() != EstadoPresupuesto.ENVIADO) {
+        if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
             throw new ConflictoException("Solo se pueden rechazar presupuestos enviados");
         }
 
@@ -370,14 +350,9 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoRechazado);
     }
 
-    public PresupuestoResponseDTO caducarPresupuesto(Long id){
-        Optional<Presupuesto> presupuestoEncontrado = presupuestoRepository.findById(id);
+    public PresupuestoResponseDTO caducarPresupuesto(Long id, Long empresaId){
 
-        if(presupuestoEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("No se encontro el presupuesto");
-        }
-
-        Presupuesto presupuesto = presupuestoEncontrado.get();
+        Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
             throw new ConflictoException("Solo se pueden caducar presupuestos enviados");
@@ -397,23 +372,19 @@ public class PresupuestoService {
         }
 
         LocalDate hoy = LocalDate.now();
+
         LocalDate fechaLimite = presupuesto.getFechaEnvio().plusDays(15);
 
         if(hoy.isEqual(fechaLimite) || hoy.isAfter(fechaLimite)){
             return true;
         }
-        
+
         return false;
     }
 
-    public void eliminarPresupuesto(Long id){
-        Optional<Presupuesto> presupuestoEncontrado =  presupuestoRepository.findById(id);
+    public void eliminarPresupuesto(Long id, Long empresaId){
 
-        if(presupuestoEncontrado.isEmpty()){
-            throw new RecursoNoEncontradoException("El presupuesto no existe");
-        }
-
-        Presupuesto presupuesto = presupuestoEncontrado.get();
+        Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
 
         if(presupuesto.getEstado() != EstadoPresupuesto.BORRADOR){
             throw new ConflictoException("El presupuesto solo puede borrarse en estado 'Borrador'");
@@ -422,4 +393,16 @@ public class PresupuestoService {
         presupuestoRepository.delete(presupuesto);
     }
 
+    private Presupuesto obtenerPresupuestoDeEmpresa(Long id, Long empresaId){
+
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        Presupuesto presupuesto = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el presupuesto"));
+
+        if(!presupuesto.getEmpresa().getId().equals(empresa.getId())){
+            throw new AccesoDenegadoException("El presupuesto no pertenece a esta empresa");
+        }
+
+        return presupuesto;
+    }
 }
