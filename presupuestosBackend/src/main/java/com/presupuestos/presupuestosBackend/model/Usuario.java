@@ -18,6 +18,7 @@ public class Usuario {
 
     private String telefono;
 
+    @Column(nullable = false, unique = true)
     private String email;
 
     private String password;
@@ -27,7 +28,7 @@ public class Usuario {
     private TipoRol rol;
 
     @ManyToOne
-    @JoinColumn(name= "empresa_id" ,nullable = false)
+    @JoinColumn(name= "empresa_id")
     private Empresa empresa;
 
 

@@ -1,6 +1,5 @@
 package com.presupuestos.presupuestosBackend.dto;
 
-import com.presupuestos.presupuestosBackend.enums.TipoRol;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -25,11 +24,8 @@ public class UsuarioRequestDTO {
     @Size(min = 8)
     private String password;
 
-    @NotNull
-    private TipoRol rol;
-
-    @NotNull
-    private Long empresaId;
+    @NotNull 
+    private String tokenInvitacion;
 
     public String getNombre() {
         return nombre;
@@ -79,20 +75,11 @@ public class UsuarioRequestDTO {
         this.password = password;
     }
 
-    public TipoRol getRol() {
-        return rol;
+    public String getTokenInvitacion() {
+        return tokenInvitacion;
     }
 
-    public void setRol(TipoRol rol) {
-        this.rol = rol;
-    }
-
-    public Long getEmpresaId() {
-        return empresaId;
-    }
-
-    public void setEmpresaId(Long empresaId) {
-        this.empresaId = empresaId;
+    public void setTokenInvitacion(String tokenInvitacion) {
+        this.tokenInvitacion = tokenInvitacion;
     }
 }
-
