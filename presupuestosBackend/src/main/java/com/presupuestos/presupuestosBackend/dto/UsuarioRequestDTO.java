@@ -16,8 +16,8 @@ public class UsuarioRequestDTO {
 
     private String telefono;
 
-    @NotBlank
-    @Email
+    @NotBlank(message = "El correo electrónico es obligatorio")
+    @Email(message = "El correo electrónico no es válido")
     private String email;
 
     @NotBlank
