@@ -5,14 +5,10 @@ import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.List;
 
-import com.presupuestos.presupuestosBackend.repository.EmpresaRepository;
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
-
 import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
 import com.presupuestos.presupuestosBackend.exception.ConflictoException;
-import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
 import com.presupuestos.presupuestosBackend.mapper.UsuarioMapper;
-import com.presupuestos.presupuestosBackend.model.Empresa;
 import com.presupuestos.presupuestosBackend.model.Usuario;
 import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
 
@@ -21,12 +17,10 @@ import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
 public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
-    private final EmpresaRepository empresaRepository;
     private final UsuarioMapper usuarioMapper;
 
-    public UsuarioService(UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository, UsuarioMapper usuarioMapper) {
+    public UsuarioService(UsuarioRepository usuarioRepository, UsuarioMapper usuarioMapper) {
         this.usuarioRepository = usuarioRepository;
-        this.empresaRepository = empresaRepository;
         this.usuarioMapper = usuarioMapper;
     }
 
@@ -52,16 +46,6 @@ public class UsuarioService {
             throw new ConflictoException("Ya existe un usuario con este correo");
         }
 
-        Long empresaId = dto.getEmpresaId();
-
-        Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
-
-        if(empresaEncontrada.isEmpty()){
-            throw new RecursoNoEncontradoException("Error, no se ha encontrado la empresa");
-        }
-
-        Empresa empresa = empresaEncontrada.get();
-
         Usuario usuario = new Usuario();
 
         usuario.setNombre(dto.getNombre());
@@ -70,8 +54,6 @@ public class UsuarioService {
         usuario.setTelefono(dto.getTelefono());
         usuario.setEmail(dto.getEmail());
         usuario.setPassword(dto.getPassword());
-        usuario.setRol(dto.getRol());
-        usuario.setEmpresa(empresa);
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 

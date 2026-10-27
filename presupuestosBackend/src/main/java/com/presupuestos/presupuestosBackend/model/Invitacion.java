@@ -2,6 +2,7 @@ package com.presupuestos.presupuestosBackend.model;
 
 import java.time.LocalDateTime;
 
+import com.presupuestos.presupuestosBackend.enums.EstadoInvitacion;
 import com.presupuestos.presupuestosBackend.enums.TipoRol;
 
 import jakarta.persistence.*;
@@ -35,7 +36,11 @@ public class Invitacion {
     private LocalDateTime fechaExpiracion;
 
     @Column(nullable = false)
-    private boolean aceptada;
+    private LocalDateTime fechaUltimoEnvio;
+
+    @Enumerated (EnumType.STRING)
+    @Column(nullable = false)
+    private EstadoInvitacion estadoInvitacion;
 
     public Long getId(){
         return id;
@@ -47,6 +52,14 @@ public class Invitacion {
 
     public String getEmail(){
         return email;
+    }
+
+    public EstadoInvitacion getEstadoInvitacion(){
+        return estadoInvitacion;
+    }
+
+    public void setEstadoInvitacion(EstadoInvitacion estadoInvitacion){
+        this.estadoInvitacion = estadoInvitacion;
     }
 
     public void setEmail(String email){
@@ -93,11 +106,11 @@ public class Invitacion {
         this.fechaExpiracion = fechaExpiracion;
     }
 
-    public boolean isAceptada(){
-        return aceptada;
+    public LocalDateTime getFechaUltimoEnvio(){
+        return fechaUltimoEnvio;
     }
 
-    public void setAceptada(boolean aceptada){
-        this.aceptada = aceptada;
+    public void setFechaUltimoEnvio(LocalDateTime fechaUltimoEnvio){
+        this.fechaUltimoEnvio = fechaUltimoEnvio;
     }
 }
