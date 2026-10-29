@@ -2,9 +2,12 @@ package com.presupuestos.presupuestosBackend.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.List;
 
 import com.presupuestos.presupuestosBackend.dto.InvitacionRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.InvitacionResponseDTO;
+import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
+import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
 import com.presupuestos.presupuestosBackend.enums.EstadoInvitacion;
 import com.presupuestos.presupuestosBackend.enums.TipoRol;
 import com.presupuestos.presupuestosBackend.exception.AccesoDenegadoException;
@@ -32,13 +35,15 @@ public class InvitacionService {
 
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
+    private final UsuarioService usuarioService;
 
-    public InvitacionService(EmpresaRepository empresaRepository, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
+    public InvitacionService(EmpresaRepository empresaRepository ,UsuarioService usuarioService, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
 
         this.invitacionRepository = invitacionRepository;
         this.invitacionMapper = invitacionMapper;
         this.empresaRepository = empresaRepository;
         this.usuarioRepository = usuarioRepository;
+        this.usuarioService = usuarioService;
     }
 
     @Transactional 
@@ -121,7 +126,7 @@ public class InvitacionService {
     @Transactional 
     public InvitacionResponseDTO reenviarInvitacion(Long id, Long usuarioId){
 
-        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNoEncontradoException("No se ha enconntrado al usuario"));
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado al usuario"));
 
         Invitacion invitacion = invitacionRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la invitación"));
 
@@ -145,7 +150,7 @@ public class InvitacionService {
             throw new AccesoDenegadoException("Un PROPIETARIO no puede gestionar invitaciones con rol PROPIETARIO");
         }
 
-        if(invitacion.getEstadoInvitacion() != EstadoInvitacion.PENDIENTE){
+        if(invitacion.getEstadoInvitacion() == EstadoInvitacion.ACEPTADA){
             throw new ConflictoException("La invitación no está pendiente y no se puede reenviar");
         }
 
@@ -171,10 +176,59 @@ public class InvitacionService {
             return invitacionMapper.toResponseDTO(invitacionActualizada);
         }
 
-        Invitacion nuevaInvitacion = crearNuevaInvitacion(invitacion.getEmail(), invitacion.getEmpresa(), invitacion.getRol());
+        Optional<Invitacion> invitacionPendiente = invitacionRepository.findByEmailAndEmpresaAndEstadoInvitacion(invitacion.getEmail(), invitacion.getEmpresa(), EstadoInvitacion.PENDIENTE);
+
+        if(invitacionPendiente.isPresent()){
+            throw new ConflictoException("Ya hay una invitación pendiente");
+        }
+
+        Invitacion nuevaInvitacion  = crearNuevaInvitacion(invitacion.getEmail(), invitacion.getEmpresa(), invitacion.getRol());
 
         Invitacion invitacionGuardar = invitacionRepository.save(nuevaInvitacion);
 
         return invitacionMapper.toResponseDTO(invitacionGuardar);
+    }
+ 
+    @Transactional 
+    public UsuarioResponseDTO aceptarInvitacion(UsuarioRequestDTO dto){
+
+        Invitacion invitacion = invitacionRepository.findByToken(dto.getTokenInvitacion()).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la invitación"));
+        
+        if(invitacion.getEstadoInvitacion() != EstadoInvitacion.PENDIENTE){
+            throw new ConflictoException("La invitación no esta en estado 'Pendiente'");
+        }
+
+        LocalDateTime ahora = LocalDateTime.now();
+
+        if(invitacion.getFechaExpiracion().isBefore(ahora) || invitacion.getFechaExpiracion().isEqual(ahora)){
+            throw new ConflictoException("La invitación ha caducado");
+        }
+
+
+        if(usuarioRepository.existsByEmail(invitacion.getEmail())){
+            throw new ConflictoException("Ya existe un usuario con ese email");
+        }
+
+        UsuarioResponseDTO usuarioCreado = usuarioService.crearUsuarioDesdeInvitacion(dto, invitacion);
+
+        invitacion.setEstadoInvitacion(EstadoInvitacion.ACEPTADA);
+        
+        invitacionRepository.save(invitacion);
+
+        return usuarioCreado;
+    }
+
+    @Transactional 
+    public void caducarInvitacionesExpiradas(){
+
+        LocalDateTime ahora = LocalDateTime.now();
+
+        List<Invitacion> listaInvitacionCaducada = invitacionRepository.findByEstadoInvitacionAndFechaExpiracionLessThanEqual(EstadoInvitacion.PENDIENTE, ahora);
+        
+        for (Invitacion invitacion : listaInvitacionCaducada) {
+            invitacion.setEstadoInvitacion(EstadoInvitacion.CADUCADA);
+        }         
+
+        invitacionRepository.saveAll(listaInvitacionCaducada);
     }
 }

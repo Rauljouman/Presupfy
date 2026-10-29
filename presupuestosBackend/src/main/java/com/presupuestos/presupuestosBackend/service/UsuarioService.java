@@ -6,9 +6,13 @@ import java.util.Optional;
 import java.util.List;
 
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
+
+import jakarta.transaction.Transactional;
+
 import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
 import com.presupuestos.presupuestosBackend.exception.ConflictoException;
 import com.presupuestos.presupuestosBackend.mapper.UsuarioMapper;
+import com.presupuestos.presupuestosBackend.model.Invitacion;
 import com.presupuestos.presupuestosBackend.model.Usuario;
 import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
 
@@ -40,9 +44,10 @@ public class UsuarioService {
         usuarioRepository.deleteById(id);
     }
 
-    public UsuarioResponseDTO crearUsuario(UsuarioRequestDTO dto){
+    @Transactional 
+    public UsuarioResponseDTO crearUsuarioDesdeInvitacion(UsuarioRequestDTO dto, Invitacion invitacion){
 
-        if(usuarioRepository.existsByEmail(dto.getEmail())){
+        if(usuarioRepository.existsByEmail(invitacion.getEmail())){
             throw new ConflictoException("Ya existe un usuario con este correo");
         }
 
@@ -52,11 +57,14 @@ public class UsuarioService {
         usuario.setPrimerApellido(dto.getPrimerApellido());
         usuario.setSegundoApellido(dto.getSegundoApellido());
         usuario.setTelefono(dto.getTelefono());
-        usuario.setEmail(dto.getEmail());
-        usuario.setPassword(dto.getPassword());
+        usuario.setEmail(invitacion.getEmail());
+        usuario.setEmpresa(invitacion.getEmpresa());
+        usuario.setRol(invitacion.getRol());
+        
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 
         return usuarioMapper.toResponseDTO(usuarioGuardado);
     }
+
 }
