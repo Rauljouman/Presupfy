@@ -21,8 +21,6 @@ public class Usuario {
     @Column(nullable = false, unique = true)
     private String email;
 
-    private String password;
-
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TipoRol rol;
@@ -41,7 +39,6 @@ public class Usuario {
                    String segundoApellido,
                    String telefono,
                    String email,
-                   String password,
                    TipoRol rol,
                    Empresa empresa) {
 
@@ -50,7 +47,6 @@ public class Usuario {
         this.segundoApellido = segundoApellido;
         this.telefono = telefono;
         this.email = email;
-        this.password = password;
         this.rol = rol;
         this.empresa = empresa;
     }
@@ -102,14 +98,6 @@ public class Usuario {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public TipoRol getRol() {

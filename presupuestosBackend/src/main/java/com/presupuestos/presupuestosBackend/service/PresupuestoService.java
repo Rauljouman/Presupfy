@@ -302,6 +302,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoActualizado);
     }
 
+    @Transactional
     public PresupuestoResponseDTO enviarPresupuesto(Long id, Long empresaId){
 
         Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
@@ -318,6 +319,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoEnviado);
     }
 
+    @Transactional
     public PresupuestoResponseDTO aprobarPresupuesto(Long id, Long empresaId){
 
         Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
@@ -334,6 +336,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoAprobado);
     }
 
+    @Transactional
     public PresupuestoResponseDTO rechazarPresupuesto(Long id, Long empresaId){
 
         Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
@@ -350,6 +353,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoRechazado);
     }
 
+    @Transactional
     public PresupuestoResponseDTO caducarPresupuesto(Long id, Long empresaId){
 
         Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
@@ -365,6 +369,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoCaducado);
     }
 
+    @Transactional
     public boolean necesitaAvisoRespuesta(Presupuesto presupuesto){
 
         if(presupuesto.getEstado() != EstadoPresupuesto.ENVIADO){
@@ -382,6 +387,7 @@ public class PresupuestoService {
         return false;
     }
 
+    @Transactional
     public void eliminarPresupuesto(Long id, Long empresaId){
 
         Presupuesto presupuesto = obtenerPresupuestoDeEmpresa(id, empresaId);
@@ -393,6 +399,7 @@ public class PresupuestoService {
         presupuestoRepository.delete(presupuesto);
     }
 
+    @Transactional
     private Presupuesto obtenerPresupuestoDeEmpresa(Long id, Long empresaId){
 
         Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));

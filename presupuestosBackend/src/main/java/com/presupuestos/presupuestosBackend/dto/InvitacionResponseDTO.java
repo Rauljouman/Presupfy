@@ -2,6 +2,7 @@ package com.presupuestos.presupuestosBackend.dto;
 
 import java.time.LocalDateTime;
 
+import com.presupuestos.presupuestosBackend.enums.EstadoInvitacion;
 import com.presupuestos.presupuestosBackend.enums.TipoRol;
 
 public class InvitacionResponseDTO {
@@ -12,7 +13,7 @@ public class InvitacionResponseDTO {
     private Long empresaId;
     private LocalDateTime fechaCreacion;
     private LocalDateTime fechaExpiracion;
-    private boolean aceptada;
+    private EstadoInvitacion estadoInvitacion;
 
     public Long getId(){
         return id;
@@ -62,11 +63,11 @@ public class InvitacionResponseDTO {
         this.fechaExpiracion = fechaExpiracion;
     }
 
-    public boolean isAceptada(){
-        return aceptada;
+    public EstadoInvitacion EstadoInvitacion(){
+        return estadoInvitacion;
     }
 
-    public void setAceptada(boolean aceptada){
-        this.aceptada = aceptada;
+    public void setEstadoInvitacion(EstadoInvitacion estadoInvitacion){
+        this.estadoInvitacion = estadoInvitacion;
     }
 }
