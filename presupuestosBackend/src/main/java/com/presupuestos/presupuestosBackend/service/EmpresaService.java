@@ -41,10 +41,8 @@ public class EmpresaService {
 
         List<Empresa>listaEmpresa =  empresaRepository.findAll();
 
-        for (EmpresaResponseDTO empresaResponseDTO : listaEmpresaDTO) {
-            
-        } (Empresa empresa : listaEmpresa) {
-            listaEmpresaDTO.add(empresaMapper.toResponseDTO(empresa)); 
+        for (Empresa empresa : listaEmpresa) {
+                listaEmpresaDTO.add(empresaMapper.toResponseDTO(empresa)); 
         }
 
         return listaEmpresaDTO;
