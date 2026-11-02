@@ -17,5 +17,7 @@ public interface InvitacionRepository extends JpaRepository<Invitacion,Long>{
     
     Optional<Invitacion> findByEmailAndEmpresaAndEstadoInvitacion(String email, Empresa empresa, EstadoInvitacion estadoInvitacion);
 
+    List<Invitacion> findByEmpresa(Empresa empresa);
+    
     List<Invitacion> findByEstadoInvitacionAndFechaExpiracionLessThanEqual(EstadoInvitacion estadoInvitacion, LocalDateTime localDateTime);
 }
