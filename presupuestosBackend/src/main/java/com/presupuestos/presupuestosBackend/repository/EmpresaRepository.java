@@ -9,4 +9,8 @@ public interface EmpresaRepository extends JpaRepository<Empresa, Long> {
     boolean existsByNif(String nif);
 
     boolean existsByEmail(String email);
+
+    boolean existsByNifAndIdNot(String nif, Long id);
+
+    boolean existsByEmailAndIdNot(String email, Long id);
 }
