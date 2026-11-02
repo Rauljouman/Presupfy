@@ -2,6 +2,7 @@ package com.presupuestos.presupuestosBackend.service;
 
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.presupuestos.presupuestosBackend.dto.InvitacionRequestDTO;
@@ -230,5 +231,39 @@ public class InvitacionService {
         }         
 
         invitacionRepository.saveAll(listaInvitacionCaducada);
+    }
+
+    public List<InvitacionResponseDTO> listarInvitaciones(Long usuarioId){
+
+        Usuario usuario = usuarioRepository.findById(usuarioId)
+            .orElseThrow(() -> new RecursoNoEncontradoException(
+                "No se ha encontrado al usuario"
+            ));
+
+        if(usuario.getRol() == TipoRol.USUARIO){
+            throw new AccesoDenegadoException(
+                "El usuario no tiene permisos para ver las invitaciones"
+            );
+        }
+
+        List<Invitacion> listaInvitaciones;
+
+        if(usuario.getRol() == TipoRol.SUPERADMIN){
+
+            listaInvitaciones = invitacionRepository.findAll();
+
+        } else {
+
+            listaInvitaciones =
+                invitacionRepository.findByEmpresa(usuario.getEmpresa());
+        }
+
+        List<InvitacionResponseDTO> listaDTO = new ArrayList<>();
+
+        for(Invitacion invitacion : listaInvitaciones){
+            listaDTO.add(invitacionMapper.toResponseDTO(invitacion));
+        }
+
+        return listaDTO;
     }
 }

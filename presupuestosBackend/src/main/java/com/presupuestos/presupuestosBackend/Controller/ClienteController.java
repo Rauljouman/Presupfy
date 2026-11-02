@@ -1,4 +1,4 @@
-package com.presupuestos.presupuestosBackend.Controller;
+package com.presupuestos.presupuestosBackend.controller;
 
 import java.util.List;
 
