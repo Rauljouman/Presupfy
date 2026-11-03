@@ -1,8 +1,6 @@
 package com.presupuestos.presupuestosBackend.dto;
 
-import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
 public class UsuarioRequestDTO {
@@ -16,15 +14,11 @@ public class UsuarioRequestDTO {
 
     private String telefono;
 
-    @NotBlank(message = "El correo electrónico es obligatorio")
-    @Email(message = "El correo electrónico no es válido")
-    private String email;
-
     @NotBlank
     @Size(min = 8)
     private String password;
 
-    @NotNull 
+    @NotBlank
     private String tokenInvitacion;
 
     public String getNombre() {
@@ -57,14 +51,6 @@ public class UsuarioRequestDTO {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
     }
 
     public String getPassword() {

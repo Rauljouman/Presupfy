@@ -63,7 +63,7 @@ public class InvitacionResponseDTO {
         this.fechaExpiracion = fechaExpiracion;
     }
 
-    public EstadoInvitacion EstadoInvitacion(){
+    public EstadoInvitacion getEstadoInvitacion(){
         return estadoInvitacion;
     }
 
