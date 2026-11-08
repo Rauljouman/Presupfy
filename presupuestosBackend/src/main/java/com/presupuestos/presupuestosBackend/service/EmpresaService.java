@@ -69,7 +69,13 @@ public class EmpresaService {
     }
 
 
-    public EmpresaResponseDTO crearEmpresa(EmpresaRequestDTO dto){
+    public EmpresaResponseDTO crearEmpresa(EmpresaRequestDTO dto, Long usuarioId){
+
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado el usuario"));
+
+        if(usuario.getRol() != TipoRol.SUPERADMIN){
+            throw new AccesoDenegadoException("El usuario no tiene permisos suficientes para crear la empresa");
+        }
 
         if(empresaRepository.existsByNif(dto.getNif())){
             throw new ConflictoException("El NIF ya está registrado");
@@ -146,15 +152,13 @@ public class EmpresaService {
     @Transactional
     public void eliminarEmpresa(Long id, Long usuarioId){
 
-        Usuario usuario = usuarioRepository.findById(usuarioId)
-                .orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado al usuario"));
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado al usuario"));
 
         if(usuario.getRol() != TipoRol.PROPIETARIO && usuario.getRol() != TipoRol.SUPERADMIN){
             throw new AccesoDenegadoException("No tienes permisos suficientes para eliminar la empresa");
         }
 
-        Empresa empresa = empresaRepository.findById(id)
-                .orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+        Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
 
         if(usuario.getRol() == TipoRol.PROPIETARIO && !usuario.getEmpresa().getId().equals(empresa.getId())){
             throw new AccesoDenegadoException("No puedes eliminar una empresa a la que no perteneces");
@@ -163,5 +167,41 @@ public class EmpresaService {
         empresa.setActivo(false);
 
         empresaRepository.save(empresa);
+    }
+
+    @Transactional
+    public void reactivarEmpresa(Long id, Long usuarioId){
+
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encotrado al usuario"));
+
+        if(usuario.getRol() != TipoRol.SUPERADMIN){
+            throw new AccesoDenegadoException("El usuario no tiene permisos suficientes para modificar el estado de la empresa");
+        }
+
+        Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if(empresa.isActivo()){
+            throw new ConflictoException("La empresa esta activa");
+        }
+
+        empresa.setActivo(true);
+    }
+
+    @Transactional
+    public void desactivarEmpresa(Long id, Long usuarioId){
+
+        Usuario usuario = usuarioRepository.findById(usuarioId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encotrado al usuario"));
+
+        if(usuario.getRol() != TipoRol.SUPERADMIN){
+            throw new AccesoDenegadoException("El usuario no tiene permisos suficientes para modificar el estado de la empresa");
+        }
+
+        Empresa empresa = empresaRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+
+        if(!empresa.isActivo()){
+            throw new ConflictoException("La empresa esta desactivada");
+        }
+
+        empresa.setActivo(false);
     }
 }
