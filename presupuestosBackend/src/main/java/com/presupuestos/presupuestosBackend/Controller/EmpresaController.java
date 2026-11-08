@@ -39,8 +39,8 @@ public class EmpresaController {
     } 
 
     @PostMapping 
-    public EmpresaResponseDTO crearEmpresa(@Valid @RequestBody EmpresaRequestDTO dto){
-        return empresaService.crearEmpresa(dto);
+    public EmpresaResponseDTO crearEmpresa(@Valid @RequestBody EmpresaRequestDTO dto,@RequestParam Long usuarioId){
+        return empresaService.crearEmpresa(dto, usuarioId);
     }
 
     @PutMapping("/{id}")
@@ -51,5 +51,15 @@ public class EmpresaController {
     @DeleteMapping ("/{id}")
     public void eliminarEmpresa(@PathVariable Long id,@RequestParam Long usuarioId){
         empresaService.eliminarEmpresa(id, usuarioId);
+    }
+
+    @PutMapping ("/{id}")
+    public void reactivarEmpresa(@PathVariable Long id, @RequestParam Long usuarioId){
+        empresaService.reactivarEmpresa(id, usuarioId);
+    }
+
+    @PutMapping ("/{id}")
+    public void desactivarEmpresa(@PathVariable Long id, @RequestParam Long usuarioId){
+        empresaService.reactivarEmpresa(id, usuarioId);
     }
 }
