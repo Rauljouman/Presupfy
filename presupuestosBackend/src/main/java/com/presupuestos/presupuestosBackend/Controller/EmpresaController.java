@@ -53,13 +53,13 @@ public class EmpresaController {
         empresaService.eliminarEmpresa(id, usuarioId);
     }
 
-    @PutMapping ("/{id}")
+    @PutMapping ("/{id}/activar")
     public void reactivarEmpresa(@PathVariable Long id, @RequestParam Long usuarioId){
         empresaService.reactivarEmpresa(id, usuarioId);
     }
 
-    @PutMapping ("/{id}")
+    @PutMapping ("/{id}/desactivar")
     public void desactivarEmpresa(@PathVariable Long id, @RequestParam Long usuarioId){
-        empresaService.reactivarEmpresa(id, usuarioId);
+        empresaService.desactivarEmpresa(id, usuarioId);
     }
 }
