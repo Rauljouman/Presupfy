@@ -13,18 +13,17 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.presupuestos.presupuestosBackend.dto.CambiarRolRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
-import com.presupuestos.presupuestosBackend.service.UsuarioEmpresaService;
+import com.presupuestos.presupuestosBackend.service.UsuarioService;
 
-import jakarta.validation.Valid;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/usuarios")
 public class UsuarioController {
 
-    private final UsuarioEmpresaService usuarioService;
+    private final UsuarioService usuarioService;
 
-    public UsuarioController(UsuarioEmpresaService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService) {
         this.usuarioService = usuarioService;
     }
 
@@ -39,12 +38,12 @@ public class UsuarioController {
     }
 
     @PutMapping("/{id}")
-    public UsuarioResponseDTO actualizarUsuario(@PathVariable Long id, @Valid @RequestBody UsuarioRequestDTO dto, @RequestParam Long usuarioId){
+    public UsuarioResponseDTO actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO dto, @RequestParam Long usuarioId){
         return usuarioService.actualizarUsuario(id, dto, usuarioId);
     }
 
     @PatchMapping("/{id}/rol")
-    public UsuarioResponseDTO cambiarRolUsuario(@PathVariable Long id, @Valid @RequestBody CambiarRolRequestDTO dto, @RequestParam Long usuarioId){
+    public UsuarioResponseDTO cambiarRolUsuario(@PathVariable Long id, @RequestBody CambiarRolRequestDTO dto, @RequestParam Long usuarioId){
         return usuarioService.cambiarRolUsuario(id, dto.getRol(), usuarioId);
     }
 }
