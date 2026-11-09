@@ -36,9 +36,9 @@ public class InvitacionService {
 
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
-    private final UsuarioService usuarioService;
+    private final UsuarioEmpresaService usuarioService;
 
-    public InvitacionService(EmpresaRepository empresaRepository ,UsuarioService usuarioService, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
+    public InvitacionService(EmpresaRepository empresaRepository ,UsuarioEmpresaService usuarioService, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
 
         this.invitacionRepository = invitacionRepository;
         this.invitacionMapper = invitacionMapper;
