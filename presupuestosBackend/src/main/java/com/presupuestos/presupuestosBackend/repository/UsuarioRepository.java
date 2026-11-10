@@ -1,6 +1,8 @@
 package com.presupuestos.presupuestosBackend.repository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 
@@ -12,5 +14,7 @@ public interface UsuarioRepository extends JpaRepository<Usuario, Long> {
     boolean existsByEmail(String email);
 
     List<Usuario> findByEmpresa(Empresa empresa);
+
+    Optional<Usuario> findByAuthUserId(UUID authUserId);
     
 }
