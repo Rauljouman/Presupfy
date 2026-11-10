@@ -1,6 +1,7 @@
 package com.presupuestos.presupuestosBackend.model;
 import com.presupuestos.presupuestosBackend.enums.TipoRol;
 
+import java.util.UUID;
 import jakarta.persistence.*;
 
 @Entity
@@ -9,6 +10,17 @@ public class Usuario {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(name = "auth_user_id", unique = true)
+    private UUID authUserId;
+
+    public UUID getAuthUserId() {
+        return authUserId;
+    }
+
+    public void setAuthUserId(UUID authUserId) {
+        this.authUserId = authUserId;
+    }
 
     private String nombre;
 
