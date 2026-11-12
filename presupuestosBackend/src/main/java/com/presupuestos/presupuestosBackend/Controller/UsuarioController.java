@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.presupuestos.presupuestosBackend.dto.CambiarRolRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.UsuarioRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.UsuarioResponseDTO;
+import com.presupuestos.presupuestosBackend.model.Usuario;
 import com.presupuestos.presupuestosBackend.service.UsuarioService;
+import com.presupuestos.presupuestosBackend.service.UsuarioAutenticadoService;
+import com.presupuestos.presupuestosBackend.mapper.UsuarioMapper;
 
 import java.util.List;
 
@@ -22,13 +25,24 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
+    private final UsuarioMapper usuarioMapper;
 
-    public UsuarioController(UsuarioService usuarioService) {
+    public UsuarioController(UsuarioService usuarioService, UsuarioAutenticadoService usuarioAutenticadoService, UsuarioMapper usuarioMapper) {
         this.usuarioService = usuarioService;
+        this.usuarioAutenticadoService = usuarioAutenticadoService;
+        this.usuarioMapper = usuarioMapper;
+    }
+
+    @GetMapping("/me")
+    public UsuarioResponseDTO obtenerMiPerfil(){
+        Usuario usuario = usuarioAutenticadoService.obtenerUsuarioAutenticado();
+        return usuarioMapper.toResponseDTO(usuario);
     }
 
     @GetMapping
-    public List<UsuarioResponseDTO> listarUsuario(@RequestParam Long empresaId, @RequestParam Long usuarioId){
+    public List<UsuarioResponseDTO> listarUsuario(@RequestParam Long empresaId){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return usuarioService.listarUsuario(empresaId, usuarioId);
     }
 
