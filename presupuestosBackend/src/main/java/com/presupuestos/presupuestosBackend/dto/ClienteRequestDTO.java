@@ -23,9 +23,6 @@ public class ClienteRequestDTO {
     @Email
     private String email;
 
-    @NotNull
-    private Long empresaId;
-
     public TipoCliente getTipoCliente() {
         return tipoCliente;
     }
@@ -104,13 +101,5 @@ public class ClienteRequestDTO {
 
     public void setEmail(String email) {
         this.email = email;
-    }
-
-    public Long getEmpresaId() {
-        return empresaId;
-    }
-
-    public void setEmpresaId(Long empresaId) {
-        this.empresaId = empresaId;
     }
 }

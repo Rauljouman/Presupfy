@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import com.presupuestos.presupuestosBackend.dto.ProductoServicioRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.ProductoServicioResponseDTO;
 import com.presupuestos.presupuestosBackend.service.ProductoServicioService;
+import com.presupuestos.presupuestosBackend.service.UsuarioAutenticadoService;
+
 
 import jakarta.validation.Valid;
 import java.util.List;
@@ -23,38 +25,46 @@ import java.util.List;
 public class ProductoServicioController {
 
     private final ProductoServicioService productoServicioService;
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
 
-    public ProductoServicioController(ProductoServicioService productoServicioService) {
+    public ProductoServicioController(ProductoServicioService productoServicioService, UsuarioAutenticadoService usuarioAutenticadoService) {
         this.productoServicioService = productoServicioService;
+        this.usuarioAutenticadoService = usuarioAutenticadoService;
     }
 
     @GetMapping
-    public List<ProductoServicioResponseDTO> listarProductoServicio(@RequestParam Long empresaId, @RequestParam Long usuarioId){
+    public List<ProductoServicioResponseDTO> listarProductoServicio(@RequestParam Long empresaId){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return productoServicioService.listarProductoServicio(empresaId, usuarioId);
     }
 
     @GetMapping("/{id}")
-    public ProductoServicioResponseDTO buscarProductoServicioId(@PathVariable Long id, @RequestParam Long usuarioId){
+    public ProductoServicioResponseDTO buscarProductoServicioId(@PathVariable Long id){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return productoServicioService.buscarProductoServicioId(id, usuarioId);
     }
 
     @PostMapping
-    public ProductoServicioResponseDTO crearProductoServicio(@Valid @RequestBody ProductoServicioRequestDTO dto, @RequestParam Long usuarioId){
+    public ProductoServicioResponseDTO crearProductoServicio(@Valid @RequestBody ProductoServicioRequestDTO dto){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return productoServicioService.crearProductoServicio(dto, usuarioId);
     }
 
     @PutMapping("/{id}")
-    public ProductoServicioResponseDTO actualizarProductoServicio(@PathVariable Long id, @Valid @RequestBody ProductoServicioRequestDTO dto, @RequestParam Long usuarioId){
+    public ProductoServicioResponseDTO actualizarProductoServicio(@PathVariable Long id, @Valid @RequestBody ProductoServicioRequestDTO dto){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return productoServicioService.actualizarProductoServicio(id, dto, usuarioId);
     }
 
     @DeleteMapping("/{id}")
-    public void desactivarProductoServicio(@PathVariable Long id, @RequestParam Long usuarioId){
+    public void desactivarProductoServicio(@PathVariable Long id){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         productoServicioService.desactivarProductoServicio(id, usuarioId);
     }
 
     @PutMapping("/{id}/reactivar")
-    public void reactivarProductoServicio(@PathVariable Long id, @RequestParam Long usuarioId){
+    public void reactivarProductoServicio(@PathVariable Long id){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         productoServicioService.reactivarProductoServicio(id, usuarioId);
     }
 }
