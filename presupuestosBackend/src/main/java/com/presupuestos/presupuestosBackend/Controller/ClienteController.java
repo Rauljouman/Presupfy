@@ -6,6 +6,8 @@ import com.presupuestos.presupuestosBackend.dto.ClienteRequestDTO;
 import com.presupuestos.presupuestosBackend.dto.ClienteResponseDTO;
 import com.presupuestos.presupuestosBackend.exception.SolicitudInvalidaException;
 import com.presupuestos.presupuestosBackend.service.ClienteService;
+import com.presupuestos.presupuestosBackend.service.UsuarioAutenticadoService;
+
 
 import jakarta.validation.Valid;
 
@@ -24,14 +26,17 @@ import org.springframework.web.bind.annotation.RestController;
 public class ClienteController {
 
     private final ClienteService clienteService;
+    private final UsuarioAutenticadoService usuarioAutenticadoService;
 
-    public ClienteController(ClienteService clienteService) {
+    public ClienteController(ClienteService clienteService, UsuarioAutenticadoService usuarioAutenticadoService) {
         this.clienteService = clienteService;
+        this.usuarioAutenticadoService = usuarioAutenticadoService;
     }
 
     @GetMapping 
-    public List<ClienteResponseDTO> listarCliente(@RequestParam Long empresId){
-        return clienteService.listarCliente(empresId);
+    public List<ClienteResponseDTO> listarCliente(){
+        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        return clienteService.listarCliente(empresaId);
     }
 
     @PostMapping
@@ -41,21 +46,28 @@ public class ClienteController {
             throw new SolicitudInvalidaException("El tipo de cliente es obligatorio"); 
         }
 
-        return clienteService.crearCliente(dto);
+        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+
+        return clienteService.crearCliente(dto, empresaId);
     }
 
     @PutMapping("/{id}")
     public ClienteResponseDTO actualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO dto){
-        return clienteService.actualizarCliente(id, dto);
+
+        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+
+        return clienteService.actualizarCliente(id, dto, empresaId);
     }
 
     @DeleteMapping("/{id}")
-    public void eliminarCliente(@PathVariable Long id,@RequestParam Long empresId){
-        clienteService.eliminarCliente(id, empresId);
+    public void eliminarCliente(@PathVariable Long id){
+        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        clienteService.eliminarCliente(id, empresaId);
     }
 
     @GetMapping("/{id}")
-    public ClienteResponseDTO buscarCliente(@PathVariable Long id, @RequestParam Long empresaId){
+    public ClienteResponseDTO buscarCliente(@PathVariable Long id){
+        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
         return clienteService.buscarCliente(id, empresaId);
     }
 }

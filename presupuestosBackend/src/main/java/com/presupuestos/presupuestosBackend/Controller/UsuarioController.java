@@ -47,17 +47,20 @@ public class UsuarioController {
     }
 
     @GetMapping("/{id}")
-    public UsuarioResponseDTO buscarUsuarioId(@PathVariable Long id, @RequestParam Long usuarioId){
+    public UsuarioResponseDTO buscarUsuarioId(@PathVariable Long id){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return usuarioService.buscarUsuarioId(id, usuarioId);
     }
 
     @PutMapping("/{id}")
-    public UsuarioResponseDTO actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO dto, @RequestParam Long usuarioId){
+    public UsuarioResponseDTO actualizarUsuario(@PathVariable Long id, @RequestBody UsuarioRequestDTO dto){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return usuarioService.actualizarUsuario(id, dto, usuarioId);
     }
 
     @PatchMapping("/{id}/rol")
-    public UsuarioResponseDTO cambiarRolUsuario(@PathVariable Long id, @RequestBody CambiarRolRequestDTO dto, @RequestParam Long usuarioId){
+    public UsuarioResponseDTO cambiarRolUsuario(@PathVariable Long id, @RequestBody CambiarRolRequestDTO dto){
+        Long usuarioId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getId();
         return usuarioService.cambiarRolUsuario(id, dto.getRol(), usuarioId);
     }
 }

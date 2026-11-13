@@ -65,7 +65,7 @@ public class ClienteService {
         return clienteMapper.toResponseDTO(cliente);
     }
 
-    public ClienteResponseDTO crearCliente(ClienteRequestDTO dto) {
+    public ClienteResponseDTO crearCliente(ClienteRequestDTO dto, Long empresaId) {
 
         if(dto.getTipoCliente() == TipoCliente.PARTICULAR) {
             if(dto.getNombre() == null || dto.getNombre().isBlank() || dto.getDni() == null || dto.getDni().isBlank()){
@@ -77,8 +77,6 @@ public class ClienteService {
             }
         }
         
-        Long empresaId = dto.getEmpresaId();
-
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
@@ -122,11 +120,11 @@ public class ClienteService {
         clienteRepository.delete(cliente);
     }
 
-    public ClienteResponseDTO actualizarCliente(Long id, ClienteRequestDTO dto) {
+    public ClienteResponseDTO actualizarCliente(Long id, ClienteRequestDTO dto, Long empresaId) {
 
         Cliente cliente = clienteRepository.findById(id).orElseThrow(() ->new RecursoNoEncontradoException( "No se ha encontrado el cliente"));
 
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(() ->new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(() ->new RecursoNoEncontradoException("No se ha encontrado la empresa"));
 
         if (!cliente.getEmpresa().getId().equals(empresa.getId())) {throw new AccesoDenegadoException("El cliente no pertenece a esta empresa");}
 
