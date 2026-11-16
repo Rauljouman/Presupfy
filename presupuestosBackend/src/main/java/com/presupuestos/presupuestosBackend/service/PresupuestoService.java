@@ -83,7 +83,7 @@ public class PresupuestoService {
         return presupuestoMapper.toResponseDTO(presupuestoEncontrado);
     }
 
-    public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto){
+    public PresupuestoResponseDTO crearPresupuesto(PresupuestoRequestDTO dto, Long usuarioId, Long empresaId){
 
         Presupuesto presupuesto = new Presupuesto();
 
@@ -96,7 +96,6 @@ public class PresupuestoService {
 
         Cliente cliente = clienteEncontrado.get();
 
-        Long empresaId = dto.getEmpresaId();
         Optional<Empresa> empresaEncontrada = empresaRepository.findById(empresaId);
 
         if(empresaEncontrada.isEmpty()){
@@ -109,7 +108,6 @@ public class PresupuestoService {
             throw new AccesoDenegadoException("Error, el cliente no pertenece a esta empresa");
         }
 
-        Long usuarioId = dto.getUsuarioId();
         Optional<Usuario> usuarioEncontrado = usuarioRepository.findById(usuarioId);
 
         if(usuarioEncontrado.isEmpty()){
@@ -230,11 +228,11 @@ public class PresupuestoService {
     }
 
     @Transactional
-    public PresupuestoResponseDTO modificarPresupuesto(Long id, PresupuestoRequestDTO dto){
+    public PresupuestoResponseDTO modificarPresupuesto(Long id, PresupuestoRequestDTO dto, Long empresaId){
 
         Presupuesto presupuesto = presupuestoRepository.findById(id).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado el presupuesto"));
 
-        Empresa empresa = empresaRepository.findById(dto.getEmpresaId()).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
+        Empresa empresa = empresaRepository.findById(empresaId).orElseThrow(()-> new RecursoNoEncontradoException("No se ha encontrado la empresa"));
 
         if(!presupuesto.getEmpresa().getId().equals(empresa.getId())){
             throw new AccesoDenegadoException("El presupuesto no pertenece a esta empresa");

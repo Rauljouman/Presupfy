@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 public class LineaPresupuestoRequestDTO {
 
-    private Long productoServicioId; // puede ser null si es una línea manual
+    private Long productoServicioId; 
 
     private String nombre;
     private String descripcion;

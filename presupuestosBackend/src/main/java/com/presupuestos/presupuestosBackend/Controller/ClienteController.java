@@ -18,7 +18,6 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
@@ -35,7 +34,7 @@ public class ClienteController {
 
     @GetMapping 
     public List<ClienteResponseDTO> listarCliente(){
-        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        Long empresaId = usuarioAutenticadoService.obtenerEmpresaIdAutenticada();
         return clienteService.listarCliente(empresaId);
     }
 
@@ -46,7 +45,7 @@ public class ClienteController {
             throw new SolicitudInvalidaException("El tipo de cliente es obligatorio"); 
         }
 
-        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        Long empresaId = usuarioAutenticadoService.obtenerEmpresaIdAutenticada();
 
         return clienteService.crearCliente(dto, empresaId);
     }
@@ -54,20 +53,20 @@ public class ClienteController {
     @PutMapping("/{id}")
     public ClienteResponseDTO actualizarCliente(@PathVariable Long id, @Valid @RequestBody ClienteRequestDTO dto){
 
-        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        Long empresaId = usuarioAutenticadoService.obtenerEmpresaIdAutenticada();
 
         return clienteService.actualizarCliente(id, dto, empresaId);
     }
 
     @DeleteMapping("/{id}")
     public void eliminarCliente(@PathVariable Long id){
-        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        Long empresaId = usuarioAutenticadoService.obtenerEmpresaIdAutenticada();
         clienteService.eliminarCliente(id, empresaId);
     }
 
     @GetMapping("/{id}")
     public ClienteResponseDTO buscarCliente(@PathVariable Long id){
-        Long empresaId = usuarioAutenticadoService.obtenerUsuarioAutenticado().getEmpresa().getId();
+        Long empresaId = usuarioAutenticadoService.obtenerEmpresaIdAutenticada();
         return clienteService.buscarCliente(id, empresaId);
     }
 }
