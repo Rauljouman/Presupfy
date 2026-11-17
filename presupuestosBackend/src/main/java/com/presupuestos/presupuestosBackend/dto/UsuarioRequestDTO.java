@@ -15,10 +15,6 @@ public class UsuarioRequestDTO {
     private String telefono;
 
     @NotBlank
-    @Size(min = 8)
-    private String password;
-
-    @NotBlank
     private String tokenInvitacion;
 
     public String getNombre() {
@@ -51,14 +47,6 @@ public class UsuarioRequestDTO {
 
     public void setTelefono(String telefono) {
         this.telefono = telefono;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 
     public String getTokenInvitacion() {

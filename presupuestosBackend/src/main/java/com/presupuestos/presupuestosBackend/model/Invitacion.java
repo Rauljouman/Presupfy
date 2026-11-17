@@ -17,7 +17,7 @@ public class Invitacion {
     @Column (nullable = false) 
     private String email;
 
-    @Column (nullable = false)  
+    @Column (nullable = false, unique = true)  
     private String token;
 
     @Enumerated(EnumType.STRING)
