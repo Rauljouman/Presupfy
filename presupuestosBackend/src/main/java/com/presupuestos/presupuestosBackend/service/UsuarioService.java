@@ -39,7 +39,7 @@ public class UsuarioService {
     @Transactional
     public UsuarioResponseDTO crearUsuarioDesdeInvitacion(UsuarioRequestDTO dto, Invitacion invitacion, UUID authUserId){
 
-        if(usuarioRepository.existsByEmail(invitacion.getEmail())){
+        if(usuarioRepository.existsByEmailIgnoreCase(invitacion.getEmail())){
             throw new ConflictoException("Ya existe un usuario con este email");
         }
 

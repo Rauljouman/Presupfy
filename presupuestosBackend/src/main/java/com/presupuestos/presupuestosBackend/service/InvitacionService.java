@@ -37,13 +37,16 @@ public class InvitacionService {
     private final EmpresaRepository empresaRepository;
     private final UsuarioRepository usuarioRepository;
     private final UsuarioService usuarioService;
+    private final SupabaseAuthService supabaseAuthService;
 
-    public InvitacionService(EmpresaRepository empresaRepository, UsuarioService usuarioService, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
+    public InvitacionService(EmpresaRepository empresaRepository, SupabaseAuthService supabaseAuthService, UsuarioService usuarioService, UsuarioRepository usuarioRepository, InvitacionRepository invitacionRepository, InvitacionMapper invitacionMapper){
         this.invitacionRepository = invitacionRepository;
         this.invitacionMapper = invitacionMapper;
         this.empresaRepository = empresaRepository;
         this.usuarioRepository = usuarioRepository;
         this.usuarioService = usuarioService;
+        this.supabaseAuthService = supabaseAuthService;
+
     }
 
     @Transactional
@@ -189,7 +192,7 @@ public class InvitacionService {
     }
 
     @Transactional
-    public UsuarioResponseDTO aceptarInvitacion(UsuarioRequestDTO dto, UUID authUserId,  String emailAutenticado){
+    public UsuarioResponseDTO aceptarInvitacion(UsuarioRequestDTO dto, UUID authUserId,  String emailAutenticado, String accessToken){
 
         Invitacion invitacion = invitacionRepository.findByToken(dto.getTokenInvitacion()).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado la invitación"));
 
@@ -220,6 +223,8 @@ public class InvitacionService {
                 "Esta cuenta de Supabase ya está vinculada a un usuario"
             );
         }
+
+        supabaseAuthService.verificarUsuario(accessToken, authUserId, emailAutenticado);
 
         UsuarioResponseDTO usuarioCreado = usuarioService.crearUsuarioDesdeInvitacion(dto, invitacion, authUserId);
 

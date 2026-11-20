@@ -60,7 +60,7 @@ public class InvitacionController {
 
             String email = jwt.getClaimAsString("email");
 
-            UsuarioResponseDTO respuesta = invitacionService.aceptarInvitacion(dto, authUserId, email);
+            UsuarioResponseDTO respuesta = invitacionService.aceptarInvitacion(dto, authUserId, email, jwt.getTokenValue());
 
             return ResponseEntity.ok(respuesta);
         }
