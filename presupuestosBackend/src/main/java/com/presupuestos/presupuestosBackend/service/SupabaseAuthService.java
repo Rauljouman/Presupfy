@@ -20,6 +20,9 @@ public class SupabaseAuthService {
             @Value("${supabase.url}") String supabaseUrl,
             @Value("${supabase.publishable-key}") String publishableKey) {
 
+        System.out.println("URL BASE SUPABASE: [" + supabaseUrl + "]");
+
+
         this.restClient = RestClient.builder()
                 .baseUrl(supabaseUrl)
                 .defaultHeader("apikey", publishableKey)
@@ -41,8 +44,16 @@ public class SupabaseAuthService {
                     .body(Map.class);
 
         } catch (RestClientException e) {
+            System.err.println(
+                "Error al consultar Supabase: " + e.getClass().getSimpleName()
+            );
+
+            if (e instanceof org.springframework.web.client.RestClientResponseException ex) {
+                System.err.println("Estado HTTP de Supabase: " + ex.getStatusCode());
+            }
+
             throw new AccesoDenegadoException(
-                    "No se ha podido verificar la identidad con Supabase"
+                "No se ha podido verificar la identidad con Supabase"
             );
         }
 
