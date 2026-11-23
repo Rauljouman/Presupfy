@@ -1,0 +1,44 @@
+
+@import "@fontsource/ibm-plex-sans/400.css";
+@import "@fontsource/ibm-plex-sans/500.css";
+@import "@fontsource/ibm-plex-sans/600.css";
+@import "@fontsource/ibm-plex-sans/700.css";
+
+@import "@fontsource/ibm-plex-serif/500.css";
+@import "@fontsource/ibm-plex-serif/600.css";
+
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "IBM Plex Sans", sans-serif;
+  --font-editorial: "IBM Plex Serif", serif;
+
+  --color-primary: #142C3E;
+  --color-accent: #D56B49;
+  --color-background: #F5F3EE;
+  --color-muted: #687780;
+  --color-border: #DFE2E0;
+}
+
+:root {
+  font-family: var(--font-sans);
+  color: var(--color-primary);
+  background: var(--color-background);
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+}
+
+button, input, select, textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  cursor: not-allowed;
+}
