@@ -8,18 +8,24 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
+import com.presupuestos.presupuestosBackend.enums.TipoRol;
 import com.presupuestos.presupuestosBackend.exception.AccesoDenegadoException;
 import com.presupuestos.presupuestosBackend.exception.RecursoNoEncontradoException;
+import com.presupuestos.presupuestosBackend.model.Empresa;
 import com.presupuestos.presupuestosBackend.model.Usuario;
+import com.presupuestos.presupuestosBackend.repository.EmpresaRepository;
 import com.presupuestos.presupuestosBackend.repository.UsuarioRepository;
+
 
 @Service
 public class UsuarioAutenticadoService {
 
     private final UsuarioRepository usuarioRepository;
+    private final EmpresaRepository empresaRepository;
 
-    public UsuarioAutenticadoService(UsuarioRepository usuarioRepository) {
+    public UsuarioAutenticadoService(UsuarioRepository usuarioRepository, EmpresaRepository empresaRepository) {
         this.usuarioRepository = usuarioRepository;
+        this.empresaRepository = empresaRepository;
     }
 
     public Usuario obtenerUsuarioAutenticado(){
@@ -39,5 +45,20 @@ public class UsuarioAutenticadoService {
         }
 
         return usuarioRepository.findByAuthUserId(authUserId).orElseThrow(() -> new RecursoNoEncontradoException("El usuario autenticado no está registrado en el CRM"));
+    }
+
+    public Long obtenerEmpresaIdAutenticada(){
+        
+        Usuario usuario = obtenerUsuarioAutenticado();
+
+        if(usuario.getRol() == TipoRol.SUPERADMIN){
+            throw new AccesoDenegadoException("No tienes el rol adecuado");
+        }
+
+        if(usuario.getEmpresa() == null){
+            throw new RecursoNoEncontradoException("No se ha encontrado la empresa del usuario");
+        }
+        
+        return usuario.getEmpresa().getId();
     }
 }

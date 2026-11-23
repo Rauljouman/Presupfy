@@ -3,6 +3,7 @@ package com.presupuestos.presupuestosBackend.service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -36,9 +37,9 @@ public class UsuarioService {
     }
 
     @Transactional
-    public UsuarioResponseDTO crearUsuarioDesdeInvitacion(UsuarioRequestDTO dto, Invitacion invitacion){
+    public UsuarioResponseDTO crearUsuarioDesdeInvitacion(UsuarioRequestDTO dto, Invitacion invitacion, UUID authUserId){
 
-        if(usuarioRepository.existsByEmail(invitacion.getEmail())){
+        if(usuarioRepository.existsByEmailIgnoreCase(invitacion.getEmail())){
             throw new ConflictoException("Ya existe un usuario con este email");
         }
 
@@ -51,6 +52,7 @@ public class UsuarioService {
         usuario.setEmail(invitacion.getEmail());
         usuario.setRol(invitacion.getRol());
         usuario.setEmpresa(invitacion.getEmpresa());
+        usuario.setAuthUserId(authUserId);
 
         Usuario usuarioGuardado = usuarioRepository.save(usuario);
 

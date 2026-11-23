@@ -1,7 +1,11 @@
 package com.presupuestos.presupuestosBackend.controller;
 
 import java.util.List;
+import java.util.UUID;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.jwt.Jwt;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,7 +54,14 @@ public class InvitacionController {
     }
 
     @PostMapping("/aceptar")
-    public UsuarioResponseDTO aceptarInvitacion(@Valid @RequestBody UsuarioRequestDTO dto) {
-        return invitacionService.aceptarInvitacion(dto);
-    }
+        public ResponseEntity<UsuarioResponseDTO> aceptarInvitacion(@Valid @RequestBody UsuarioRequestDTO dto, @AuthenticationPrincipal Jwt jwt) {
+
+            UUID authUserId = UUID.fromString(jwt.getSubject());
+
+            String email = jwt.getClaimAsString("email");
+
+            UsuarioResponseDTO respuesta = invitacionService.aceptarInvitacion(dto, authUserId, email, jwt.getTokenValue());
+
+            return ResponseEntity.ok(respuesta);
+        }
 }

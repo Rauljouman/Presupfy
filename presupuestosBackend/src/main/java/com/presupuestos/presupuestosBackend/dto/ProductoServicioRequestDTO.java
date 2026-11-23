@@ -25,9 +25,6 @@ public class ProductoServicioRequestDTO {
     @DecimalMin(value = "0.0")
     private BigDecimal tipoIva;
 
-    @NotNull
-    private Long empresaId;
-
     public TipoProductoServicio getTipo() {
         return tipo;
     }
@@ -66,13 +63,5 @@ public class ProductoServicioRequestDTO {
 
     public void setTipoIva(BigDecimal tipoIva) {
         this.tipoIva = tipoIva;
-    }
-
-    public Long getEmpresaId() {
-        return empresaId;
-    }
-
-    public void setEmpresaId(Long empresaId) {
-        this.empresaId = empresaId;
     }
 }

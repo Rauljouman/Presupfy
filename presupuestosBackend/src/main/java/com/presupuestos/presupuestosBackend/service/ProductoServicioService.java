@@ -67,7 +67,7 @@ public class ProductoServicioService {
     public ProductoServicioResponseDTO crearProductoServicio(ProductoServicioRequestDTO dto, Long usuarioId){
 
         Usuario usuario = buscarUsuario(usuarioId);
-        Empresa empresa = buscarEmpresa(dto.getEmpresaId());
+        Empresa empresa = usuario.getEmpresa();
 
         comprobarPermisosEdicion(usuario, empresa);
 
@@ -94,6 +94,7 @@ public class ProductoServicioService {
     public ProductoServicioResponseDTO actualizarProductoServicio(Long id, ProductoServicioRequestDTO dto, Long usuarioId){
 
         Usuario usuario = buscarUsuario(usuarioId);
+
         ProductoServicio producto = productoServicioRepository.findById(id).orElseThrow(() -> new RecursoNoEncontradoException("No se ha encontrado el producto o servicio"));
 
         comprobarPermisosEdicion(usuario, producto.getEmpresa());
@@ -104,10 +105,6 @@ public class ProductoServicioService {
 
         if(!producto.isActivo()){
             throw new ConflictoException("El producto o servicio está desactivado");
-        }
-
-        if(!producto.getEmpresa().getId().equals(dto.getEmpresaId())){
-            throw new ConflictoException("No se puede cambiar la empresa de un producto o servicio");
         }
 
         producto.setTipo(dto.getTipo());
@@ -164,10 +161,10 @@ public class ProductoServicioService {
     private void comprobarAcceso(Usuario usuario, Empresa empresa){
 
         if(usuario.getRol() == TipoRol.SUPERADMIN){
-            return;
+            throw new AccesoDenegadoException("SUPERADMIN no puede acceder a productos o servicios");
         }
 
-        if(usuario.getEmpresa() == null || !usuario.getEmpresa().getId().equals(empresa.getId())){
+        if(usuario.getEmpresa() == null || empresa == null || !usuario.getEmpresa().getId().equals(empresa.getId())){
             throw new AccesoDenegadoException("No puedes acceder a los productos o servicios de otra empresa");
         }
     }

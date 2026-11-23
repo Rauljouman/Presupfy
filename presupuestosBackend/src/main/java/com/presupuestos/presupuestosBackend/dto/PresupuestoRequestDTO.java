@@ -7,13 +7,8 @@ import java.util.List;
 public class PresupuestoRequestDTO {
 
     private String titulo;
+    
     private String notas;
-
-    @NotNull
-    private Long usuarioId;
-
-    @NotNull
-    private Long empresaId;
 
     @NotNull
     private Long clienteId;
@@ -34,22 +29,6 @@ public class PresupuestoRequestDTO {
 
     public void setNotas(String notas) {
         this.notas = notas;
-    }
-
-    public Long getUsuarioId() {
-        return usuarioId;
-    }
-
-    public void setUsuarioId(Long usuarioId) {
-        this.usuarioId = usuarioId;
-    }
-
-    public Long getEmpresaId() {
-        return empresaId;
-    }
-
-    public void setEmpresaId(Long empresaId) {
-        this.empresaId = empresaId;
     }
 
     public Long getClienteId() {
