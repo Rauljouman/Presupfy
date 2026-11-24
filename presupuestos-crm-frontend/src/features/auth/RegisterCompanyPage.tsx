@@ -256,19 +256,43 @@ function RegisterCompanyPage() {
           </div>
         </FormSection>
 
-        {/* CONSENTIMIENTO */}
-        <label className="flex cursor-pointer items-start gap-3 px-1 pt-3 text-sm leading-5 text-primary">
-          <input
-            type="checkbox"
-            name="aceptaTerminos"
-            className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#D56B49]"
-          />
+        {/* Información legal y aceptación */}
+        <div className="space-y-2 px-1 pt-3">
+          <label className="flex cursor-pointer items-start gap-3">
+            <input
+              type="checkbox"
+              name="aceptaTerminos"
+              required
+              className="mt-1 h-4 w-4 shrink-0 cursor-pointer accent-[#D56B49]"
+            />
 
-          <span>
-            Acepto los términos de uso y la política de privacidad
-            de Presupfy.
-          </span>
-        </label>
+            <span className="text-sm leading-5 text-primary">
+              He leído y acepto los{' '}
+              <Link
+                to="/terminos"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="font-medium text-accent underline underline-offset-2 hover:text-[#BC5839]"
+              >
+                Términos y condiciones
+              </Link>
+              .
+            </span>
+          </label>
+
+          <p className="pl-7 text-xs leading-5 text-muted">
+            Puedes consultar cómo tratamos tus datos en nuestra{' '}
+            <Link
+              to="/privacidad"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="font-medium text-accent underline underline-offset-2"
+            >
+              Política de privacidad
+            </Link>
+            .
+          </p>
+        </div>
 
         {/* ENVÍO PENDIENTE DE BACKEND */}
         <div className="pt-3">

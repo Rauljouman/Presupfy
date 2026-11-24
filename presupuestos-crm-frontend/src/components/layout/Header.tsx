@@ -1,4 +1,3 @@
-
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
 import { LogOut, Menu } from 'lucide-react'
@@ -54,7 +53,7 @@ function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
 
         <div className="min-w-0">
           <p className="truncate text-sm font-semibold text-primary">
-            Mi empresa
+            Acme Soluciones, S.L.
           </p>
 
           <p className="hidden text-xs text-muted sm:block">

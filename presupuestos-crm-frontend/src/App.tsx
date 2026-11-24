@@ -7,6 +7,11 @@ import LoginPage from './features/auth/LoginPage'
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage'
 import ResetPasswordPage from './features/auth/ResetPasswordPage'
 import RegisterCompanyPage from './features/auth/RegisterCompanyPage'
+import PrivacyPage from './features/legal/PrivacyPage'
+import TermsPage from './features/legal/TermsPage'
+import CookiesPage from './features/legal/CookiesPage'
+import LegalNoticePage from './features/legal/LegalNoticePage'
+
 
 const pages = [
   {
@@ -87,6 +92,14 @@ function App() {
             />
           }
         />
+
+
+        {/* Páginas legales públicas */}
+        <Route path="/privacidad" element={<PrivacyPage />} />
+        <Route path="/terminos" element={<TermsPage />} />
+        <Route path="/cookies" element={<CookiesPage />} />
+        <Route path="/aviso-legal" element={<LegalNoticePage />} />
+
 
         {/* ÁREA EMPRESARIAL */}
         <Route element={<ProtectedRoute />}>

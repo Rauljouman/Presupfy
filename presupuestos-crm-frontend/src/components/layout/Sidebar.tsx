@@ -1,8 +1,14 @@
 
 import { NavLink } from 'react-router'
 import {
-  LayoutDashboard, FileText, Users, Package,
-  UserRound, Building2, Settings, X
+  Building2,
+  FileText,
+  LayoutGrid,
+  Package,
+  Settings,
+  UserRound,
+  Users,
+  X,
 } from 'lucide-react'
 
 type SidebarProps = {
@@ -10,14 +16,14 @@ type SidebarProps = {
   onClose: () => void
 }
 
-const menuItems = [
-  { label: 'Dashboard', path: '/', icon: LayoutDashboard },
-  { label: 'Presupuestos', path: '/presupuestos', icon: FileText },
-  { label: 'Clientes', path: '/clientes', icon: Users },
-  { label: 'Productos y servicios', path: '/productos', icon: Package },
-  { label: 'Equipo', path: '/equipo', icon: UserRound },
-  { label: 'Mi empresa', path: '/empresa', icon: Building2 },
-  { label: 'Ajustes', path: '/ajustes', icon: Settings },
+const navigation = [
+  { to: '/', label: 'Dashboard', icon: LayoutGrid },
+  { to: '/presupuestos', label: 'Presupuestos', icon: FileText },
+  { to: '/clientes', label: 'Clientes', icon: Users },
+  { to: '/productos', label: 'Productos y servicios', icon: Package },
+  { to: '/equipo', label: 'Equipo', icon: UserRound },
+  { to: '/empresa', label: 'Mi empresa', icon: Building2 },
+  { to: '/ajustes', label: 'Ajustes', icon: Settings },
 ]
 
 function Sidebar({ isOpen, onClose }: SidebarProps) {
@@ -26,73 +32,95 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
       {isOpen && (
         <button
           type="button"
-          aria-label="Cerrar navegación"
+          aria-label="Cerrar menú"
           onClick={onClose}
-          className="fixed inset-0 z-40 bg-black/50 md:hidden"
+          className="fixed inset-0 z-40 bg-slate-950/45 md:hidden"
         />
       )}
 
       <aside
         id="mobile-navigation"
-        aria-label="Navegación del CRM"
         className={`
-          fixed inset-y-0 left-0 z-50 flex w-64
-          flex-col bg-primary px-3 py-6 text-white
-          transition-transform duration-200
-          md:sticky md:top-0 md:h-screen md:w-18
-          md:shrink-0 md:translate-x-0
-          lg:w-64 lg:px-4
+          fixed inset-y-0 left-0 z-50 w-[240px]
+          bg-[#142C3E] text-white
+          transition-transform duration-300
+          md:sticky md:top-0 md:h-screen md:shrink-0
           ${isOpen ? 'translate-x-0' : '-translate-x-full'}
+          md:translate-x-0
         `}
       >
-        <div className="mb-10 flex items-center justify-between px-2">
-          <span className="font-semibold md:hidden lg:block">
-            Presupuestos CRM
-          </span>
+        <div className="flex h-full flex-col">
+          {/* USUARIO ACTUAL */}
+          <div className="flex min-h-20 items-center justify-between gap-3 border-b border-white/10 px-4 py-4">
+            <div className="flex min-w-0 items-center gap-3">
+              <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
+                <UserRound
+                  size={20}
+                  aria-hidden="true"
+                  className="text-white/80"
+                />
+              </div>
 
-          <span className="hidden font-bold md:block lg:hidden">
-            P.
-          </span>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-semibold text-white">
+                  Raúl Jouman
+                </p>
 
-          <button
-            type="button"
-            onClick={onClose}
-            aria-label="Cerrar menú"
-            className="md:hidden"
+                <p className="mt-0.5 text-xs text-white/60">
+                  Propietario
+                </p>
+              </div>
+            </div>
+
+            <button
+              type="button"
+              onClick={onClose}
+              aria-label="Cerrar menú"
+              className="shrink-0 cursor-pointer rounded-md p-1.5 text-white/70 hover:bg-white/10 md:hidden"
+            >
+              <X size={18} aria-hidden="true" />
+            </button>
+          </div>
+
+          {/* NAVEGACIÓN */}
+          <nav
+            aria-label="Navegación principal"
+            className="min-h-0 flex-1 overflow-y-auto px-3 py-4"
           >
-            <X size={22} />
-          </button>
+            <ul className="space-y-1.5">
+              {navigation.map((item) => {
+                const Icon = item.icon
+
+                return (
+                  <li key={item.to}>
+                    <NavLink
+                      to={item.to}
+                      end={item.to === '/'}
+                      onClick={onClose}
+                      className={({ isActive }) => `
+                        flex min-h-11 cursor-pointer items-center
+                        gap-3 rounded-xl px-3 py-2.5
+                        text-sm font-medium transition-colors
+                        ${
+                          isActive
+                            ? 'bg-accent text-white'
+                            : 'text-white/85 hover:bg-white/10 hover:text-white'
+                        }
+                      `}
+                    >
+                      <Icon
+                        size={18}
+                        aria-hidden="true"
+                        className="shrink-0"
+                      />
+                      <span>{item.label}</span>
+                    </NavLink>
+                  </li>
+                )
+              })}
+            </ul>
+          </nav>
         </div>
-
-        <nav className="flex flex-col gap-1">
-          {menuItems.map((item) => {
-            const Icon = item.icon
-
-            return (
-              <NavLink
-                key={item.path}
-                to={item.path}
-                end={item.path === '/'}
-                title={item.label}
-                onClick={onClose}
-                className={({ isActive }) =>
-                  `flex min-h-11 items-center gap-3 rounded-md
-                   px-3 py-3 transition-colors
-                   focus-visible:outline-2 focus-visible:outline-white
-                   ${isActive
-                     ? 'bg-accent text-white'
-                     : 'text-white/75 hover:bg-white/10 hover:text-white'
-                   }`
-                }
-              >
-                <Icon size={20} className="shrink-0" />
-                <span className="md:hidden lg:block">
-                  {item.label}
-                </span>
-              </NavLink>
-            )
-          })}
-        </nav>
       </aside>
     </>
   )
