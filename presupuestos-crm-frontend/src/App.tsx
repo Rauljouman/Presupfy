@@ -6,6 +6,7 @@ import PagePlaceholder from './components/PagePlaceholder'
 import LoginPage from './features/auth/LoginPage'
 import ForgotPasswordPage from './features/auth/ForgotPasswordPage'
 import ResetPasswordPage from './features/auth/ResetPasswordPage'
+import RegisterCompanyPage from './features/auth/RegisterCompanyPage'
 
 const pages = [
   {
@@ -70,6 +71,11 @@ function App() {
               description="Formulario de recuperación pendiente."
             />
           }
+        />
+
+        <Route
+          path="/registro-empresa"
+          element={<RegisterCompanyPage />}
         />
 
         <Route
