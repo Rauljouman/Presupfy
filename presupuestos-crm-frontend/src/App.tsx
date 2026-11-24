@@ -2,6 +2,7 @@
 import { BrowserRouter, Route, Routes } from 'react-router'
 import AppLayout from './components/layout/AppLayout'
 import PagePlaceholder from './components/PagePlaceholder'
+import LoginPage from './features/auth/LoginPage'
 
 const pages = [
   { path: '/', title: 'Dashboard',
@@ -24,6 +25,19 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
+        
+        <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/registro-empresa"
+          element={
+            <PagePlaceholder
+              title="Registrar empresa"
+              description="Aquí construiremos el formulario de alta de empresa."
+            />
+          }
+        />
+
         <Route element={<AppLayout />}>
           {pages.map((page) => (
             <Route
