@@ -11,6 +11,7 @@ import {
   LoaderCircle,
 } from 'lucide-react'
 
+import AuthLayout from '../../components/auth/AuthLayout'
 import { supabase } from '../../lib/supabase'
 import { api } from '../../lib/api'
 
@@ -45,7 +46,7 @@ function LoginPage() {
     setLoading(true)
 
     try {
-      // 1. Autenticar en Supabase
+      // Autenticar en Supabase
       const { error: authError } =
         await supabase.auth.signInWithPassword({
           email: email.trim(),
@@ -57,14 +58,14 @@ function LoginPage() {
         return
       }
 
-      // 2. Obtener usuario desde Spring Boot
+      // Obtener usuario desde Spring Boot
       const response = await api.get<UsuarioCRM>(
         '/api/usuarios/me'
       )
 
       const usuario = response.data
 
-      // 3. Redirigir según el rol
+      // Redirigir según el rol
       if (usuario.rol === 'SUPERADMIN') {
         navigate('/admin/empresas', { replace: true })
       } else {
@@ -100,353 +101,242 @@ function LoginPage() {
   }
 
   return (
-    <div
-      className="
-        relative min-h-screen overflow-hidden
-        bg-background
-        cursor-default select-none
-      "
-    >
-      {/* IMAGEN DE FONDO */}
-      <div
-        aria-hidden="true"
-        className="
-          pointer-events-none absolute inset-0
-          bg-cover bg-center
-        "
-        style={{
-          backgroundImage: "url('/login-building.jpg')",
-        }}
-      />
+    <AuthLayout>
+      {/* Encabezado */}
+      <div className="mb-4 cursor-default select-none">
+        <h1 className="text-[clamp(1.7rem,3vw,2.2rem)] font-semibold leading-tight tracking-tight text-primary">
+          Inicio de sesión en Presupfy
+        </h1>
 
-      {/* CAPA OSCURA */}
-      <div
-        aria-hidden="true"
-        className="
-          pointer-events-none absolute inset-0
-          bg-[linear-gradient(135deg,rgba(20,44,62,0.48),rgba(20,44,62,0.24))]
-        "
-      />
+        <p className="mt-1.5 text-sm leading-5 text-muted">
+          Accede a tu espacio de trabajo y gestiona tus presupuestos.
+        </p>
+      </div>
 
-      {/* CONTENIDO */}
-      <main
-        className="
-          relative z-10 flex min-h-screen
-          items-center justify-center
-          px-4 py-8 sm:px-6 md:px-8
-        "
+
+      {/* Formulario */}
+      <form
+        onSubmit={handleSubmit}
+        noValidate
+        className="space-y-4"
       >
-        {/* TARJETA TRANSLÚCIDA */}
-        <div
-          className="
-            login-enter relative w-full max-w-[480px]
-            rounded-[24px] border border-white/60
-            bg-white/70 p-6 sm:p-8
-            shadow-[0_24px_70px_rgba(10,28,43,0.25)]
-            backdrop-blur-lg backdrop-saturate-150
-          "
-        >
-          {/* ENCABEZADO */}
-          <div className="mb-6 cursor-default select-none">
-            <h1
-              className="
-                cursor-default select-none
-                text-[clamp(1.7rem,3vw,2.2rem)]
-                font-semibold leading-tight
-                tracking-tight text-primary
-              "
-            >
-              Inicio de sesión en Presupfy
-            </h1>
-
-            <p
-              className="
-                mt-3 cursor-default select-none
-                text-sm leading-6 text-muted
-              "
-            >
-              Accede a tu espacio de trabajo y gestiona tus presupuestos.
-            </p>
-          </div>
-
-          {/* FORMULARIO */}
-          <form
-            onSubmit={handleSubmit}
-            noValidate
-            className="space-y-4"
+        {/* Correo */}
+        <div className="group">
+          <label
+            htmlFor="email"
+            className="mb-2 block cursor-pointer select-none text-sm font-medium text-primary"
           >
-            {/* CORREO ELECTRÓNICO */}
-            <div className="group">
-              <label
-                htmlFor="email"
-                className="
-                  mb-2 block cursor-pointer select-none
-                  text-sm font-medium text-primary
-                "
-              >
-                Correo electrónico
-              </label>
+            Correo electrónico
+          </label>
 
-              <div className="relative">
-                <Mail
-                  size={18}
-                  aria-hidden="true"
-                  className="
-                    pointer-events-none absolute
-                    top-1/2 left-4 -translate-y-1/2
-                    text-muted transition-colors duration-200
-                    group-focus-within:text-accent
-                  "
-                />
+          <div className="relative">
+            <Mail
+              size={18}
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted transition-colors duration-200 group-focus-within:text-accent"
+            />
 
-                <input
-                  id="email"
-                  type="email"
-                  autoComplete="email"
-                  inputMode="email"
-                  placeholder="tu@empresa.com"
-                  value={email}
-                  onChange={(event) => setEmail(event.target.value)}
-                  disabled={loading}
-                  required
-                  className="
-                    h-12 w-full cursor-text select-text
-                    rounded-xl border border-border
-                    bg-white/95 pr-4 pl-12
-                    text-sm text-primary caret-accent
-                    outline-none transition-all duration-200
-                    placeholder:text-muted/60
-                    hover:border-primary/30
-                    focus:border-accent
-                    focus:ring-4 focus:ring-accent/10
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
-                  "
-                />
-              </div>
-            </div>
-
-            {/* CONTRASEÑA */}
-            <div className="group">
-              <div
-                className="
-                  mb-2 flex flex-wrap
-                  items-center justify-between gap-2
-                "
-              >
-                <label
-                  htmlFor="password"
-                  className="
-                    cursor-pointer select-none
-                    text-sm font-medium text-primary
-                  "
-                >
-                  Contraseña
-                </label>
-
-                <Link
-                  to="/recuperar-contrasena"
-                  className="
-                    cursor-pointer select-none
-                    text-xs font-medium text-accent
-                    transition-colors
-                    hover:text-[#BC5839]
-                    hover:underline
-                    focus-visible:outline-2
-                    focus-visible:outline-accent
-                  "
-                >
-                  ¿Has olvidado tu contraseña?
-                </Link>
-              </div>
-
-              <div className="relative">
-                <LockKeyhole
-                  size={18}
-                  aria-hidden="true"
-                  className="
-                    pointer-events-none absolute
-                    top-1/2 left-4 -translate-y-1/2
-                    text-muted transition-colors duration-200
-                    group-focus-within:text-accent
-                  "
-                />
-
-                <input
-                  id="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Introduce tu contraseña"
-                  value={password}
-                  onChange={(event) => setPassword(event.target.value)}
-                  disabled={loading}
-                  required
-                  className="
-                    h-12 w-full cursor-text select-text
-                    rounded-xl border border-border
-                    bg-white/95 pr-12 pl-12
-                    text-sm text-primary caret-accent
-                    outline-none transition-all duration-200
-                    placeholder:text-muted/60
-                    hover:border-primary/30
-                    focus:border-accent
-                    focus:ring-4 focus:ring-accent/10
-                    disabled:cursor-not-allowed
-                    disabled:opacity-60
-                  "
-                />
-
-                {/* MOSTRAR / OCULTAR CONTRASEÑA */}
-                <button
-                  type="button"
-                  disabled={loading}
-                  aria-label={
-                    showPassword
-                      ? 'Ocultar contraseña'
-                      : 'Mostrar contraseña'
-                  }
-                  aria-pressed={showPassword}
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="
-                    absolute top-1/2 right-3
-                    -translate-y-1/2 rounded-md p-2
-                    cursor-pointer select-none
-                    text-muted transition-colors
-                    hover:text-accent
-                    focus-visible:outline-2
-                    focus-visible:outline-accent
-                    disabled:cursor-not-allowed
-                  "
-                >
-                  {showPassword ? (
-                    <EyeOff size={18} aria-hidden="true" />
-                  ) : (
-                    <Eye size={18} aria-hidden="true" />
-                  )}
-                </button>
-              </div>
-            </div>
-
-            {/* MENSAJES DE ERROR */}
-            {error && (
-              <div
-                role="alert"
-                className="
-                  cursor-default select-none
-                  rounded-xl border border-red-200
-                  bg-red-50 px-4 py-3
-                  text-sm text-red-700
-                "
-              >
-                {error}
-              </div>
-            )}
-
-            {/* INICIAR SESIÓN */}
-            <button
-              type="submit"
+            <input
+              id="email"
+              type="email"
+              autoComplete="email"
+              inputMode="email"
+              placeholder="tu@empresa.com"
+              value={email}
+              onChange={(event) => setEmail(event.target.value)}
               disabled={loading}
+              required
               className="
-                group flex h-12 w-full
-                cursor-pointer select-none
-                items-center justify-center gap-3
-                rounded-xl bg-accent px-5
-                font-medium text-white
-                shadow-[0_6px_18px_rgba(213,107,73,0.22)]
-                transition-all duration-200
-                hover:-translate-y-0.5
-                hover:bg-[#BC5839]
-                hover:shadow-[0_10px_24px_rgba(213,107,73,0.28)]
-                active:translate-y-0
-                active:shadow-sm
-                focus-visible:outline-2
-                focus-visible:outline-offset-2
-                focus-visible:outline-accent
-                disabled:cursor-not-allowed
-                disabled:opacity-60
-                disabled:hover:translate-y-0
-                motion-reduce:transition-none
-                motion-reduce:hover:translate-y-0
+                h-12 w-full cursor-text select-text
+                rounded-xl border border-border
+                bg-white/95 pr-4 pl-12
+                text-sm text-primary caret-accent
+                outline-none transition-all duration-200
+                placeholder:text-muted/60
+                hover:border-primary/30
+                focus:border-accent focus:ring-4 focus:ring-accent/10
+                disabled:cursor-not-allowed disabled:opacity-60
               "
-            >
-              {loading ? (
-                <>
-                  <LoaderCircle
-                    size={18}
-                    aria-hidden="true"
-                    className="
-                      animate-spin
-                      motion-reduce:animate-none
-                    "
-                  />
-                  Verificando acceso...
-                </>
-              ) : (
-                <>
-                  Iniciar sesión
-
-                  <ArrowRight
-                    size={18}
-                    aria-hidden="true"
-                    className="
-                      transition-transform duration-200
-                      group-hover:translate-x-1
-                      motion-reduce:transition-none
-                      motion-reduce:group-hover:translate-x-0
-                    "
-                  />
-                </>
-              )}
-            </button>
-          </form>
-
-          {/* REGISTRAR NUEVA EMPRESA */}
-          <div className="mt-6">
-            <div
-              className="
-                mb-4 flex items-center gap-3
-                cursor-default select-none
-              "
-            >
-              <div
-                aria-hidden="true"
-                className="h-px flex-1 bg-border/80"
-              />
-
-              <span className="cursor-default select-none text-xs text-muted">
-                ¿Todavía no tienes una empresa?
-              </span>
-
-              <div
-                aria-hidden="true"
-                className="h-px flex-1 bg-border/80"
-              />
-            </div>
-
-            <Link
-              to="/registro-empresa"
-              className="
-                flex h-12 w-full
-                cursor-pointer select-none
-                items-center justify-center
-                rounded-xl border border-primary/20
-                bg-white/70 px-5
-                text-sm font-semibold text-primary
-                transition-all duration-200
-                hover:border-accent
-                hover:bg-white/90
-                hover:text-accent
-                focus-visible:outline-2
-                focus-visible:outline-offset-2
-                focus-visible:outline-accent
-              "
-            >
-              Registrar nueva empresa
-            </Link>
+            />
           </div>
         </div>
-      </main>
-    </div>
+
+        {/* Contraseña */}
+        <div className="group">
+          <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
+            <label
+              htmlFor="password"
+              className="cursor-pointer select-none text-sm font-medium text-primary"
+            >
+              Contraseña
+            </label>
+
+            <Link
+              to="/recuperar-contrasena"
+              className="
+                cursor-pointer select-none
+                text-xs font-medium text-accent
+                transition-colors hover:text-[#BC5839]
+                hover:underline
+                focus-visible:outline-2 focus-visible:outline-accent
+              "
+            >
+              ¿Has olvidado tu contraseña?
+            </Link>
+          </div>
+
+          <div className="relative">
+            <LockKeyhole
+              size={18}
+              aria-hidden="true"
+              className="pointer-events-none absolute top-1/2 left-4 -translate-y-1/2 text-muted transition-colors duration-200 group-focus-within:text-accent"
+            />
+
+            <input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              autoComplete="current-password"
+              placeholder="Introduce tu contraseña"
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              disabled={loading}
+              required
+              className="
+                h-12 w-full cursor-text select-text
+                rounded-xl border border-border
+                bg-white/95 pr-12 pl-12
+                text-sm text-primary caret-accent
+                outline-none transition-all duration-200
+                placeholder:text-muted/60
+                hover:border-primary/30
+                focus:border-accent focus:ring-4 focus:ring-accent/10
+                disabled:cursor-not-allowed disabled:opacity-60
+              "
+            />
+
+            <button
+              type="button"
+              disabled={loading}
+              aria-label={
+                showPassword
+                  ? 'Ocultar contraseña'
+                  : 'Mostrar contraseña'
+              }
+              aria-pressed={showPassword}
+              onClick={() => setShowPassword(!showPassword)}
+              className="
+                absolute top-1/2 right-3 -translate-y-1/2
+                cursor-pointer select-none rounded-md p-2
+                text-muted transition-colors hover:text-accent
+                focus-visible:outline-2 focus-visible:outline-accent
+                disabled:cursor-not-allowed
+              "
+            >
+              {showPassword ? (
+                <EyeOff size={18} aria-hidden="true" />
+              ) : (
+                <Eye size={18} aria-hidden="true" />
+              )}
+            </button>
+          </div>
+        </div>
+
+        {/* Errores */}
+        {error && (
+          <div
+            role="alert"
+            className="cursor-default select-none rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700"
+          >
+            {error}
+          </div>
+        )}
+
+        {/* Iniciar sesión */}
+        <button
+          type="submit"
+          disabled={loading}
+          className="
+            group flex h-12 w-full cursor-pointer select-none
+            items-center justify-center gap-3
+            rounded-xl bg-accent px-5 font-medium text-white
+            shadow-[0_6px_18px_rgba(213,107,73,0.22)]
+            transition-all duration-200
+            hover:-translate-y-0.5
+            hover:bg-[#BC5839]
+            hover:shadow-[0_10px_24px_rgba(213,107,73,0.28)]
+            active:translate-y-0 active:shadow-sm
+            focus-visible:outline-2 focus-visible:outline-offset-2
+            focus-visible:outline-accent
+            disabled:cursor-not-allowed disabled:opacity-60
+            disabled:hover:translate-y-0
+            motion-reduce:transition-none
+            motion-reduce:hover:translate-y-0
+          "
+        >
+          {loading ? (
+            <>
+              <LoaderCircle
+                size={18}
+                aria-hidden="true"
+                className="animate-spin motion-reduce:animate-none"
+              />
+              Verificando acceso...
+            </>
+          ) : (
+            <>
+              Iniciar sesión
+              <ArrowRight
+                size={18}
+                aria-hidden="true"
+                className="
+                  transition-transform duration-200
+                  group-hover:translate-x-1
+                  motion-reduce:transition-none
+                  motion-reduce:group-hover:translate-x-0
+                "
+              />
+            </>
+          )}
+        </button>
+      </form>
+
+      {/* Registrar nueva empresa */}
+      <div className="mt-6">
+        <div className="mb-4 flex cursor-default select-none items-center gap-3">
+          <div
+            aria-hidden="true"
+            className="h-px flex-1 bg-border/80"
+          />
+
+          <span className="cursor-default select-none text-xs text-muted">
+            ¿Todavía no tienes una empresa?
+          </span>
+
+          <div
+            aria-hidden="true"
+            className="h-px flex-1 bg-border/80"
+          />
+        </div>
+
+        <Link
+          to="/registro-empresa"
+          className="
+            flex h-12 w-full cursor-pointer select-none
+            items-center justify-center
+            rounded-xl border border-primary/20
+            bg-white/70 px-5
+            text-sm font-semibold text-primary
+            transition-all duration-200
+            hover:border-accent hover:bg-white/90
+            hover:text-accent
+            focus-visible:outline-2 focus-visible:outline-offset-2
+            focus-visible:outline-accent
+          "
+        >
+          Registrar nueva empresa
+        </Link>
+      </div>
+    </AuthLayout>
   )
 }
 

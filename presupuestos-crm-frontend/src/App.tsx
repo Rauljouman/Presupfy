@@ -4,6 +4,8 @@ import AppLayout from './components/layout/AppLayout'
 import ProtectedRoute from './components/auth/ProtectedRoute'
 import PagePlaceholder from './components/PagePlaceholder'
 import LoginPage from './features/auth/LoginPage'
+import ForgotPasswordPage from './features/auth/ForgotPasswordPage'
+import ResetPasswordPage from './features/auth/ResetPasswordPage'
 
 const pages = [
   {
@@ -47,8 +49,18 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        {/* RUTAS PÚBLICAS */}
+        {/* Autenticación pública */}
         <Route path="/login" element={<LoginPage />} />
+
+        <Route
+          path="/recuperar-contrasena"
+          element={<ForgotPasswordPage />}
+        />
+
+        <Route
+          path="/restablecer-contrasena"
+          element={<ResetPasswordPage />}
+        />
 
         <Route
           path="/recuperar-contrasena"
