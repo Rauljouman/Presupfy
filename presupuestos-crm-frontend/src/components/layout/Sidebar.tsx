@@ -1,5 +1,8 @@
 
 import { NavLink } from 'react-router'
+
+import { useAuth } from '../../contexts/AuthContext'
+import { getNombreCompleto, rolLabels } from '../../types/auth'
 import {
   Building2,
   FileText,
@@ -27,6 +30,19 @@ const navigation = [
 ]
 
 function Sidebar({ isOpen, onClose }: SidebarProps) {
+
+  const { usuario, loading, error } = useAuth()
+
+  const nombreCompleto = usuario
+    ? getNombreCompleto(usuario)
+    : loading
+      ? 'Cargando usuario...'
+      : 'Usuario no disponible'
+
+  const rol = usuario
+    ? rolLabels[usuario.rol]
+    : ''
+    
   return (
     <>
       {isOpen && (
@@ -63,11 +79,11 @@ function Sidebar({ isOpen, onClose }: SidebarProps) {
 
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold text-white">
-                  Raúl Jouman
+                  {nombreCompleto}
                 </p>
 
                 <p className="mt-0.5 text-xs text-white/60">
-                  Propietario
+                  {rol || (error ? 'Error al cargar usuario' : ' ')}
                 </p>
               </div>
             </div>

@@ -1,8 +1,10 @@
+
 import { useState } from 'react'
 import { useNavigate } from 'react-router'
-import { LogOut, Menu } from 'lucide-react'
+import { Building2, LogOut, Menu } from 'lucide-react'
 
 import { supabase } from '../../lib/supabase'
+import { useAuth } from '../../contexts/AuthContext'
 
 type HeaderProps = {
   onMenuClick: () => void
@@ -11,8 +13,14 @@ type HeaderProps = {
 
 function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
   const navigate = useNavigate()
+  const { usuario, loading } = useAuth()
+
   const [loggingOut, setLoggingOut] = useState(false)
   const [error, setError] = useState('')
+
+  const nombreEmpresa = loading
+    ? 'Cargando empresa...'
+    : usuario?.empresaNombre || 'Empresa no disponible'
 
   async function handleLogout() {
     if (loggingOut) return
@@ -39,6 +47,7 @@ function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
 
   return (
     <header className="sticky top-0 z-30 flex min-h-16 shrink-0 items-center justify-between gap-3 border-b border-border bg-white px-4 md:px-6 lg:px-8">
+      {/* EMPRESA ACTIVA */}
       <div className="flex min-w-0 items-center gap-3">
         <button
           type="button"
@@ -48,23 +57,29 @@ function Header({ onMenuClick, isMenuOpen }: HeaderProps) {
           onClick={onMenuClick}
           className="cursor-pointer rounded-md p-2 hover:bg-background focus-visible:outline-2 focus-visible:outline-accent md:hidden"
         >
-          <Menu size={23} />
+          <Menu size={23} aria-hidden="true" />
         </button>
 
-        <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-primary">
-            Acme Soluciones, S.L.
-          </p>
+        <div className="flex min-w-0 items-center gap-2.5">
+          <Building2
+            size={20}
+            aria-hidden="true"
+            className="shrink-0 text-accent"
+          />
 
-          <p className="hidden text-xs text-muted sm:block">
-            Espacio de trabajo
+          <p className="truncate text-sm font-semibold text-primary">
+            {nombreEmpresa}
           </p>
         </div>
       </div>
 
-      <div className="flex items-center gap-3">
+      {/* CIERRE DE SESIÓN */}
+      <div className="flex shrink-0 items-center gap-3">
         {error && (
-          <span role="alert" className="max-w-36 text-xs text-red-700">
+          <span
+            role="alert"
+            className="max-w-36 text-xs text-red-700"
+          >
             {error}
           </span>
         )}

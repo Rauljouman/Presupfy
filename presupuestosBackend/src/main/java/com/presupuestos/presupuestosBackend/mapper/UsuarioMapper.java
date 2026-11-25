@@ -20,6 +20,7 @@ public class UsuarioMapper {
         dto.setEmail(usuario.getEmail());
         dto.setRol(usuario.getRol());
         dto.setEmpresaId(usuario.getEmpresa().getId());
+        dto.setEmpresaNombre(usuario.getEmpresa().getNombreComercial());
 
         return dto;
     }

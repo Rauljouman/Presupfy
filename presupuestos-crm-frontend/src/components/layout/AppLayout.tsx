@@ -5,13 +5,13 @@ import { Outlet } from 'react-router'
 import Sidebar from './Sidebar'
 import Header from './Header'
 import Footer from './Footer'
+import { AuthProvider } from '../../contexts/AuthContext'
 
-function AppLayout() {
+function AppLayoutContent() {
   const [isMenuOpen, setIsMenuOpen] = useState(false)
 
   return (
     <div className="flex min-h-screen bg-background">
-
       {/* SIDEBAR */}
       <Sidebar
         isOpen={isMenuOpen}
@@ -20,7 +20,6 @@ function AppLayout() {
 
       {/* CONTENIDO DEL CRM */}
       <div className="flex min-w-0 flex-1 flex-col">
-
         {/* HEADER */}
         <Header
           isMenuOpen={isMenuOpen}
@@ -34,9 +33,16 @@ function AppLayout() {
 
         {/* FOOTER */}
         <Footer variant="light" />
-
       </div>
     </div>
+  )
+}
+
+function AppLayout() {
+  return (
+    <AuthProvider>
+      <AppLayoutContent />
+    </AuthProvider>
   )
 }
 

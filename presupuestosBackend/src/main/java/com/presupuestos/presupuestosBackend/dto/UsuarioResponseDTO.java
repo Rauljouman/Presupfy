@@ -12,6 +12,7 @@ public class UsuarioResponseDTO {
     private String email;
     private TipoRol rol;
     private Long empresaId;
+    private String empresaNombre;
 
     public Long getId() {
         return id;
@@ -75,5 +76,13 @@ public class UsuarioResponseDTO {
 
     public void setEmpresaId(Long empresaId) {
         this.empresaId = empresaId;
+    }
+
+    public void setEmpresaNombre(String empresaNombre) {
+        this.empresaNombre = empresaNombre;
+    }
+
+    public String getEmpresaNombre() {
+        return empresaNombre;
     }
 }
